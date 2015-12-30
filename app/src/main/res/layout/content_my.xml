@@ -9,49 +9,19 @@
 
 
     <Button
+        android:id = "@+id/offCampus_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Yesterday's Off-Campus Crimes"
+        android:textAllCaps="false"
         android:onClick="getCrimes" />
 
     <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id = "@+id/header_table"
+        android:id = "@+id/offHeader_table"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:stretchColumns="*"
         android:divider="@android:color/transparent"
         android:padding="5dp">
-
-        <TableRow android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/reportNumber"
-                android:text="Report Number"
-                android:gravity="left"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
-                />
-            <TextView
-                android:id="@+id/incident"
-                android:text="Incident Type"
-                android:gravity="left"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
-                />
-            <TextView
-                android:id="@+id/location"
-                android:text="Location"
-                android:gravity="left"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
-                />
-            <TextView
-                android:id="@+id/description"
-                android:text="Description"
-                android:gravity="left"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
-                />
-        </TableRow>
     </TableLayout>
 
     <ScrollView
@@ -68,8 +38,9 @@
 
     <Button
         android:layout_width="match_parent"
+        android:id = "@+id/onCampus_button"
         android:layout_height="wrap_content"
-        android:text="Yesterday's On-Campus Crimes"
+        android:textAllCaps="false"
         android:onClick="getCrimes" />
 
     <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -79,37 +50,6 @@
         android:stretchColumns="*"
         android:divider="@android:color/transparent"
         android:padding="5dp">
-
-        <TableRow android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/onReportNumber"
-                android:text="Report Number"
-                android:gravity="left"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
-                />
-            <TextView
-                android:id="@+id/onIncident"
-                android:text="Incident Type"
-                android:gravity="left"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
-                />
-            <TextView
-                android:id="@+id/onLocation"
-                android:text="Location"
-                android:gravity="left"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
-                />
-            <TextView
-                android:id="@+id/onDescription"
-                android:text="Description"
-                android:gravity="left"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
-                />
-        </TableRow>
     </TableLayout>
 
     <ScrollView

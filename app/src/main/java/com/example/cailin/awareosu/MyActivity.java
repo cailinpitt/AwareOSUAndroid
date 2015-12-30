@@ -18,9 +18,11 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.content.Intent;
+import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.graphics.Typeface;
 import android.content.Intent;
 
 import org.jsoup.Jsoup;
@@ -32,6 +34,7 @@ public class MyActivity extends AppCompatActivity{
     public final static String EXTRA_MESSAGE = "com.example.cailin.MESSAGE";
     public String[] offCampusCrimes;
     public String[] onCampusCrimes;
+    public String date;
     RetrieveCrimes asyncTask = new RetrieveCrimes();
 
     @Override
@@ -66,6 +69,8 @@ public class MyActivity extends AppCompatActivity{
 
     public void offCampus() {
         TableLayout offCampusTable = (TableLayout) findViewById(R.id.off_campus);
+        TableLayout offCampusHeaderTable = (TableLayout) findViewById(R.id.offHeader_table);
+        Button offCampusButton = (Button) findViewById(R.id.offCampus_button);
         String info = "";
         // Access off-campus table and create variables
 
@@ -74,7 +79,47 @@ public class MyActivity extends AppCompatActivity{
             {
                 i = offCampusCrimes.length;
             }
+            else if (offCampusCrimes[0] == null)
+            {
+                offCampusButton.setText("No Off-Campus Crimes found for " + date);
+            }
             else {
+                if (i == 0)
+                {
+                    offCampusButton.setText("On-Campus Crimes for " + date);
+                    TableRow row = new TableRow(this);
+                    // Create new row
+
+                    TextView reportNumHeader = new TextView(this);
+                    reportNumHeader.setText("Report Number");
+                    reportNumHeader.setGravity(Gravity.LEFT);
+                    reportNumHeader.setTypeface(null, Typeface.BOLD);
+                    row.addView(reportNumHeader);
+                    // Add Report Number Header to header table
+
+                    TextView IncidentTypeHeader = new TextView(this);
+                    IncidentTypeHeader.setText("Incident Type");
+                    IncidentTypeHeader.setGravity(Gravity.LEFT);
+                    IncidentTypeHeader.setTypeface(null, Typeface.BOLD);
+                    row.addView(IncidentTypeHeader);
+                    // Add Incident Type Header to header table
+
+                    TextView locationHeader = new TextView(this);
+                    locationHeader.setText("Location");
+                    locationHeader.setGravity(Gravity.LEFT);
+                    locationHeader.setTypeface(null, Typeface.BOLD);
+                    row.addView(locationHeader);
+                    // Add Location Header to header table
+
+                    TextView descriptionHeader = new TextView(this);
+                    descriptionHeader.setText("Description");
+                    descriptionHeader.setGravity(Gravity.LEFT);
+                    descriptionHeader.setTypeface(null, Typeface.BOLD);
+                    row.addView(descriptionHeader);
+                    // Add Description Header to header table
+
+                    offCampusHeaderTable.addView(row);
+                }
                 TableRow row = new TableRow(this);
                 // Create new row
 
@@ -128,6 +173,8 @@ public class MyActivity extends AppCompatActivity{
 
     public void onCampus() {
         TableLayout onCampusTable = (TableLayout) findViewById(R.id.on_campus);
+        TableLayout onCampusHeaderTable = (TableLayout) findViewById(R.id.onHeader_table);
+        Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
         String info = "";
         // Access off-campus table and create variables
 
@@ -136,7 +183,47 @@ public class MyActivity extends AppCompatActivity{
             {
                 i = onCampusCrimes.length;
             }
+            else if (onCampusCrimes[0] == null)
+            {
+                onCampusButton.setText("No On-Campus Crimes found for " + date);
+            }
             else {
+                if (i == 0)
+                {
+                    onCampusButton.setText("On-Campus Crimes for " + date);
+                    TableRow row = new TableRow(this);
+                    // Create new row
+
+                    TextView reportNumHeader = new TextView(this);
+                    reportNumHeader.setText("Report Number");
+                    reportNumHeader.setGravity(Gravity.LEFT);
+                    reportNumHeader.setTypeface(null, Typeface.BOLD);
+                    row.addView(reportNumHeader);
+                    // Add Report Number Header to header table
+
+                    TextView IncidentTypeHeader = new TextView(this);
+                    IncidentTypeHeader.setText("Incident Type");
+                    IncidentTypeHeader.setGravity(Gravity.LEFT);
+                    IncidentTypeHeader.setTypeface(null, Typeface.BOLD);
+                    row.addView(IncidentTypeHeader);
+                    // Add Incident Type Header to header table
+
+                    TextView locationHeader = new TextView(this);
+                    locationHeader.setText("Location");
+                    locationHeader.setGravity(Gravity.LEFT);
+                    locationHeader.setTypeface(null, Typeface.BOLD);
+                    row.addView(locationHeader);
+                    // Add Location Header to header table
+
+                    TextView descriptionHeader = new TextView(this);
+                    descriptionHeader.setText("Description");
+                    descriptionHeader.setGravity(Gravity.LEFT);
+                    descriptionHeader.setTypeface(null, Typeface.BOLD);
+                    row.addView(descriptionHeader);
+                    // Add Description Header to header table
+
+                    onCampusHeaderTable.addView(row);
+                }
                 TableRow row = new TableRow(this);
                 // Create new row
 
@@ -244,7 +331,7 @@ public class MyActivity extends AppCompatActivity{
 
             offCampusCrimes = new String[500];
             onCampusCrimes = new String[500];
-            String date = getYesterdaysDate();
+            date = getYesterdaysDate();
             String columbusPD = "http://www.columbuspolice.org/reports/Results?from=placeholder&to=placeholder&loc=zon4&types=9";
             String OSUPD = "http://www.ps.ohio-state.edu/police/daily_log/view.php?date=yesterday";
             Document doc = null;
