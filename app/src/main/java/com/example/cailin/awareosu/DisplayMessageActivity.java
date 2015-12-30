@@ -9,6 +9,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+
 public class DisplayMessageActivity extends AppCompatActivity {
 
     @Override
@@ -25,6 +29,8 @@ public class DisplayMessageActivity extends AppCompatActivity {
 
         // Set the text view as the activity layout
         setContentView(textView);
+
+
     }
 
 }
