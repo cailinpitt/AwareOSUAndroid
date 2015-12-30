@@ -18,10 +18,6 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.content.Intent;
-import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -34,7 +30,8 @@ import org.jsoup.select.Elements;
 
 public class MyActivity extends AppCompatActivity{
     public final static String EXTRA_MESSAGE = "com.example.cailin.MESSAGE";
-    public String[] crimes;
+    public String[] offCampusCrimes;
+    public String[] onCampusCrimes;
     RetrieveCrimes asyncTask = new RetrieveCrimes();
 
     @Override
@@ -63,14 +60,19 @@ public class MyActivity extends AppCompatActivity{
         }
         // We now have crime information
 
+        offCampus();
+        onCampus();
+    }
+
+    public void offCampus() {
         TableLayout offCampusTable = (TableLayout) findViewById(R.id.off_campus);
         String info = "";
         // Access off-campus table and create variables
 
-        for (int i = 0; i < crimes.length; i += 5) {
-            if (crimes[i] == null)
+        for (int i = 0; i < offCampusCrimes.length; i += 5) {
+            if (offCampusCrimes[i] == null)
             {
-                i = crimes.length;
+                i = offCampusCrimes.length;
             }
             else {
                 TableRow row = new TableRow(this);
@@ -79,7 +81,7 @@ public class MyActivity extends AppCompatActivity{
                 TextView reportNum = new TextView(this);
                 reportNum.setHeight(50);
                 reportNum.setMaxWidth(45);
-                info = crimes[i];
+                info = offCampusCrimes[i];
 
                 if (info.contains("null") && info != null) {
                     info = info.replaceAll("null", "");
@@ -91,7 +93,7 @@ public class MyActivity extends AppCompatActivity{
                 TextView incidentType = new TextView(this);
                 incidentType.setHeight(50);
                 incidentType.setMaxWidth(40);
-                info = crimes[i + 1];
+                info = offCampusCrimes[i + 1];
 
                 if (info.contains("null") && info != null) {
                     info = info.replaceAll("null", "");
@@ -103,7 +105,7 @@ public class MyActivity extends AppCompatActivity{
                 TextView location = new TextView(this);
                 location.setHeight(50);
                 location.setMaxWidth(40);
-                info = crimes[i + 4];
+                info = offCampusCrimes[i + 4];
 
                 if (info.contains("null") && info != null) {
                     info = info.replaceAll("null", "");
@@ -120,6 +122,73 @@ public class MyActivity extends AppCompatActivity{
                 // Add location to row
 
                 offCampusTable.addView(row);
+            }
+        }
+    }
+
+    public void onCampus() {
+        TableLayout onCampusTable = (TableLayout) findViewById(R.id.on_campus);
+        String info = "";
+        // Access off-campus table and create variables
+
+        for (int i = 0; i < onCampusCrimes.length; i += 8) {
+            if (onCampusCrimes[i] == null)
+            {
+                i = onCampusCrimes.length;
+            }
+            else {
+                TableRow row = new TableRow(this);
+                // Create new row
+
+                TextView reportNum = new TextView(this);
+                reportNum.setHeight(50);
+                reportNum.setMaxWidth(45);
+                info = onCampusCrimes[i];
+
+                if (info != null && info.contains("null")) {
+                    info = info.replaceAll("null", "");
+                }
+                reportNum.setText(info);
+                row.addView(reportNum);
+                // Add Report Number to row
+
+                TextView incidentType = new TextView(this);
+                incidentType.setHeight(50);
+                incidentType.setMaxWidth(40);
+                info = onCampusCrimes[i + 5];
+
+                if (info != null && info.contains("null")) {
+                    info = info.replaceAll("null", "");
+                }
+                incidentType.setText(info);
+                row.addView(incidentType);
+                // Add Incident Type to row
+
+                TextView location = new TextView(this);
+                location.setHeight(50);
+                location.setMaxWidth(40);
+                info = onCampusCrimes[i + 6];
+
+                if (info != null && info.contains("null")) {
+                    info = info.replaceAll("null", "");
+                }
+                location.setText(info);
+                row.addView(location);
+                // Add location to row
+
+                TextView description = new TextView(this);
+                description.setHeight(50);
+                description.setMaxWidth(40);
+                info = onCampusCrimes[i + 7];
+
+                if (info != null && info.contains("null")) {
+                    info = info.replaceAll("null", "");
+                }
+                description.setText(info);
+                row.addView(description);
+                // Add location to row
+
+                onCampusTable.addView(row);
             }
         }
     }
@@ -173,9 +242,11 @@ public class MyActivity extends AppCompatActivity{
         protected String[] doInBackground(Void... arg0) {
         /* Get yesterday's crimes */
 
-            crimes = new String[500];
+            offCampusCrimes = new String[500];
+            onCampusCrimes = new String[500];
             String date = getYesterdaysDate();
             String columbusPD = "http://www.columbuspolice.org/reports/Results?from=placeholder&to=placeholder&loc=zon4&types=9";
+            String OSUPD = "http://www.ps.ohio-state.edu/police/daily_log/view.php?date=yesterday";
             Document doc = null;
             boolean websiteDown = false;
             // Create variables
@@ -186,7 +257,7 @@ public class MyActivity extends AppCompatActivity{
                 // Try to visit Columbus PD's website
             }
             catch(java.io.IOException ex){
-                crimes[0] = "The Columbus Police Department's website is currently down. Please be sure to " +
+                offCampusCrimes[0] = "The Columbus Police Department's website is currently down. Please be sure to " +
                         "check the CPD web portal (http://www.columbuspolice.org/reports/SearchLocation?" +
                         "loc=zon4\\) later today or tomorrow for any updates.";
 
@@ -204,16 +275,42 @@ public class MyActivity extends AppCompatActivity{
                 int counter = 0;
                 for (Element info : crimeInfo) {
                     String linkText = info.text();
-                    crimes[counter] += linkText;
+                    offCampusCrimes[counter] += linkText;
                     counter++;
                     // Retrieve individual crime info
                 }
             }
 
-            return crimes;
+            try {
+                String userAgent = System.getProperty("http.agent");
+                doc = Jsoup.connect(OSUPD).timeout(10*1000).userAgent(userAgent).get();
+                // Try to visit OSU PD's website
+            }
+            catch(java.io.IOException ex){
+                onCampusCrimes[0] = "The OSU Police Department's website is currently down. Please be sure to " +
+                        "check the OSU web portal (http://www.ps.ohio-state.edu/police/daily_log/) " +
+                        "later today or tomorrow for any updates.";
+
+                websiteDown = true;
+                // Website is down, handle case
+            }
+
+            if (!websiteDown) {
+                Elements crimeTable = doc.select("td.log");
+                // HTML table holding yesterday's crimes
+
+                int counter = 0;
+                for (Element info : crimeTable) {
+                    String linkText = info.text();
+                    onCampusCrimes[counter] += linkText;
+                    counter++;
+                    // Retrieve individual crime info
+                }
+            }
+            return null;
         }
 
-        protected void onPostExecute(String[] result) {
+        protected void onPostExecute(Void... arg0) {
         }
 
         protected String getYesterdaysDate(Void... arg0) {
