@@ -11,6 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
 
+        <uses-library android:name="com.google.android.maps" />
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyBJLeRb0NrbaQk47qJuIYaXpliG4W8EsXA"/>
+
         <!-- Splash screen -->
         <activity
             android:name=".SplashScreen"

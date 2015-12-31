@@ -11,6 +11,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
@@ -356,6 +358,9 @@ public class MyActivity extends AppCompatActivity{
         else if (id == R.id.show_map){
             // Do map fragment
 
+            setContentView(R.layout.activity_map_fragment);
+            addMapFragment();
+
             return true;
         }
 
@@ -370,6 +375,13 @@ public class MyActivity extends AppCompatActivity{
         startActivity(intent);
     }
 
+    private void addMapFragment() {
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        MapFragment fragment = new MapFragment();
+        transaction.add(R.id.mapView, fragment);
+        transaction.commit();
+    }
     /**
      * Class to handle web scraping.
      */
