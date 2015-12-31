@@ -85,6 +85,7 @@ public class MyActivity extends AppCompatActivity{
     public void offCampus(String[] crimes, String dateFromSearch) {
         TableLayout offCampusTable = (TableLayout) findViewById(R.id.off_campus);
         offCampusTable.removeAllViews();
+        TextView offMessage = (TextView) findViewById(R.id.off_message);
         TableLayout offCampusHeaderTable = (TableLayout) findViewById(R.id.offHeader_table);
         offCampusHeaderTable.removeAllViews();
         Button offCampusButton = (Button) findViewById(R.id.offCampus_button);
@@ -96,9 +97,22 @@ public class MyActivity extends AppCompatActivity{
             {
                 i = crimes.length;
             }
-            else if (crimes[0] == null)
+            else if (crimes[0].equals("down"))
             {
-                offCampusButton.setText("No Off-Campus Crimes found for " + dateFromSearch);
+                offCampusButton.setText("Website down");
+                offMessage.setText("The Columbus Police Department's website is currently down. Please be sure to " +
+                    "check the CPD web portal (http://www.columbuspolice.org/reports/SearchLocation?" +
+                    "loc=zon4\\) later today or tomorrow for any updates.");
+                i = crimes.length;
+            }
+            else if (crimes[0].equals("empty"))
+            {
+                offCampusButton.setText("No Off-Campus Crimes reported for " + dateFromSearch);
+                offMessage.setText("This is due to either the Columbus Police Department forgetting " +
+                        "to upload crime information, or there being no crimes. Please be sure to " +
+                        "check the CPD web portal (http://www.columbuspolice.org/reports/SearchLocation?" +
+                        "loc=zon4\\) later today or tomorrow for any updates.");
+                i = crimes.length;
             }
             else {
                 if (i == 0)
@@ -193,6 +207,7 @@ public class MyActivity extends AppCompatActivity{
         onCampusTable.removeAllViews();
         TableLayout onCampusHeaderTable = (TableLayout) findViewById(R.id.onHeader_table);
         onCampusHeaderTable.removeAllViews();
+        TextView onMessage = (TextView) findViewById(R.id.on_message);
         Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
         String info = "";
         // Access off-campus table and create variables
@@ -202,9 +217,23 @@ public class MyActivity extends AppCompatActivity{
             {
                 i = crimes.length;
             }
-            else if (crimes[0] == null)
+            else if (crimes[0].equals("down"))
             {
-                onCampusButton.setText("No On-Campus Crimes found for " + dateFromSearch);
+                onCampusButton.setText("Website down");
+                onMessage.setText("The OSU Police Department's website is currently down. " +
+                        "Please be sure to check the OSU web portal " +
+                        "(http://www.ps.ohio-state.edu/police/daily_log/) " +
+                        "later today or tomorrow for any updates.");
+                i = crimes.length;
+            }
+            else if (crimes[0].equals("empty"))
+            {
+                onCampusButton.setText("No On-Campus Crimes reported for " + dateFromSearch);
+                onMessage.setText("This is due to either the OSU Police Department forgetting " +
+                        "to upload crime information, or there being no crimes. Please be sure to " +
+                        "check the OSU web portal (http://www.ps.ohio-state.edu/police/daily_log/) " +
+                        "later today or tomorrow for any updates.");
+                i = crimes.length;
             }
             else {
                 if (i == 0)
@@ -324,6 +353,11 @@ public class MyActivity extends AppCompatActivity{
 
             return true;
         }
+        else if (id == R.id.show_map){
+            // Do map fragment
+
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -370,9 +404,7 @@ public class MyActivity extends AppCompatActivity{
                 // Try to visit Columbus PD's website
             }
             catch(java.io.IOException ex){
-                offCampusCrimes[0] = "The Columbus Police Department's website is currently down. Please be sure to " +
-                        "check the CPD web portal (http://www.columbuspolice.org/reports/SearchLocation?" +
-                        "loc=zon4\\) later today or tomorrow for any updates.";
+                offCampusCrimes[0] = "down";
 
                 websiteDown = true;
                 // Website is down, handle case
@@ -385,6 +417,10 @@ public class MyActivity extends AppCompatActivity{
                 Elements crimeInfo = crimeTable.getElementsByTag("td");
                 // Get individual crime information
 
+                if (crimeInfo.size() == 0)
+                {
+                    offCampusCrimes[0] = "empty";
+                }
                 int counter = 0;
                 for (Element info : crimeInfo) {
                     String linkText = info.text();
@@ -400,9 +436,7 @@ public class MyActivity extends AppCompatActivity{
                 // Try to visit OSU PD's website
             }
             catch(java.io.IOException ex){
-                onCampusCrimes[0] = "The OSU Police Department's website is currently down. Please be sure to " +
-                        "check the OSU web portal (http://www.ps.ohio-state.edu/police/daily_log/) " +
-                        "later today or tomorrow for any updates.";
+                onCampusCrimes[0] = "down";
 
                 websiteDown = true;
                 // Website is down, handle case
@@ -411,6 +445,11 @@ public class MyActivity extends AppCompatActivity{
             if (!websiteDown) {
                 Elements crimeTable = doc.select("td.log");
                 // HTML table holding yesterday's crimes
+
+                if (crimeTable.size() == 0)
+                {
+                    onCampusCrimes[0] = "empty";
+                }
 
                 int counter = 0;
                 for (Element info : crimeTable) {

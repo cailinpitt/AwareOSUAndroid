@@ -7,6 +7,11 @@
         android:icon="@drawable/date_icon"
         android:title="Date"
         app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/show_map"
+        android:icon="@drawable/map_icon"
+        android:title="Map"
+        app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />

@@ -19,6 +19,14 @@
             android:textAllCaps="false"
             android:onClick="getCrimes" />
 
+        <TextView
+            android:id="@+id/off_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:textSize="20sp" />
+
         <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id = "@+id/offHeader_table"
             android:layout_width="match_parent"
@@ -42,6 +50,14 @@
             android:layout_height="wrap_content"
             android:textAllCaps="false"
             android:onClick="getCrimes" />
+
+        <TextView
+            android:id="@+id/on_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:textSize="20sp" />
 
         <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id = "@+id/onHeader_table"
