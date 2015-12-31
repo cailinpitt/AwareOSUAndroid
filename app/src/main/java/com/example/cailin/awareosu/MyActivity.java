@@ -57,7 +57,7 @@ public class MyActivity extends AppCompatActivity{
                         .setAction("Action", null).show();
             }
         });
-
+/*
         try {
             String[] info = new RetrieveCrimes().execute().get();
             // Make main thread wait until crime info is retrieved
@@ -67,7 +67,11 @@ public class MyActivity extends AppCompatActivity{
             e.printStackTrace();
         }
         // We now have crime information
-
+**/
+        Intent i = getIntent();
+        offCampusCrimes = i.getStringArrayExtra("off");
+        onCampusCrimes = i.getStringArrayExtra("on");
+        // Get web scraped info from splash screen
 
         Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
 
