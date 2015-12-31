@@ -70,30 +70,36 @@ public class MyActivity extends AppCompatActivity{
 
 
         Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
-        offCampus();
-        onCampus();
+
+        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1);
+        offCampus(offCampusCrimes, dateFormat.format(cal.getTime()));
+        onCampus(onCampusCrimes, dateFormat.format(cal.getTime()));
     }
 
-    public void offCampus() {
+    public void offCampus(String[] crimes, String dateFromSearch) {
         TableLayout offCampusTable = (TableLayout) findViewById(R.id.off_campus);
+        offCampusTable.removeAllViews();
         TableLayout offCampusHeaderTable = (TableLayout) findViewById(R.id.offHeader_table);
+        offCampusHeaderTable.removeAllViews();
         Button offCampusButton = (Button) findViewById(R.id.offCampus_button);
         String info = "";
         // Access off-campus table and create variables
 
-        for (int i = 0; i < offCampusCrimes.length; i += 5) {
-            if (offCampusCrimes[i] == null)
+        for (int i = 0; i < crimes.length; i += 5) {
+            if (crimes[i] == null)
             {
-                i = offCampusCrimes.length;
+                i = crimes.length;
             }
-            else if (offCampusCrimes[0] == null)
+            else if (crimes[0] == null)
             {
-                offCampusButton.setText("No Off-Campus Crimes found for " + date);
+                offCampusButton.setText("No Off-Campus Crimes found for " + dateFromSearch);
             }
             else {
                 if (i == 0)
                 {
-                    offCampusButton.setText("Off-Campus Crimes for " + date);
+                    offCampusButton.setText("Off-Campus Crimes for " + dateFromSearch);
                     TableRow row = new TableRow(this);
                     // Create new row
 
@@ -133,9 +139,9 @@ public class MyActivity extends AppCompatActivity{
                 TextView reportNum = new TextView(this);
                 reportNum.setHeight(50);
                 reportNum.setMaxWidth(45);
-                info = offCampusCrimes[i];
+                info = crimes[i];
 
-                if (info.contains("null") && info != null) {
+                if (info != null && info.contains("null")) {
                     info = info.replaceAll("null", "");
                 }
                 reportNum.setText(info);
@@ -145,9 +151,9 @@ public class MyActivity extends AppCompatActivity{
                 TextView incidentType = new TextView(this);
                 incidentType.setHeight(50);
                 incidentType.setMaxWidth(40);
-                info = offCampusCrimes[i + 1];
+                info = crimes[i + 1];
 
-                if (info.contains("null") && info != null) {
+                if (info != null && info.contains("null")) {
                     info = info.replaceAll("null", "");
                 }
                 incidentType.setText(info);
@@ -157,9 +163,9 @@ public class MyActivity extends AppCompatActivity{
                 TextView location = new TextView(this);
                 location.setHeight(50);
                 location.setMaxWidth(40);
-                info = offCampusCrimes[i + 4];
+                info = crimes[i + 4];
 
-                if (info.contains("null") && info != null) {
+                if (info != null && info.contains("null")) {
                     info = info.replaceAll("null", "");
                 }
                 location.setText(info);
@@ -178,26 +184,28 @@ public class MyActivity extends AppCompatActivity{
         }
     }
 
-    public void onCampus() {
+    public void onCampus(String[] crimes, String dateFromSearch) {
         TableLayout onCampusTable = (TableLayout) findViewById(R.id.on_campus);
+        onCampusTable.removeAllViews();
         TableLayout onCampusHeaderTable = (TableLayout) findViewById(R.id.onHeader_table);
+        onCampusHeaderTable.removeAllViews();
         Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
         String info = "";
         // Access off-campus table and create variables
 
-        for (int i = 0; i < onCampusCrimes.length; i += 8) {
-            if (onCampusCrimes[i] == null)
+        for (int i = 0; i < crimes.length; i += 8) {
+            if (crimes[i] == null)
             {
-                i = onCampusCrimes.length;
+                i = crimes.length;
             }
-            else if (onCampusCrimes[0] == null)
+            else if (crimes[0] == null)
             {
-                onCampusButton.setText("No On-Campus Crimes found for " + date);
+                onCampusButton.setText("No On-Campus Crimes found for " + dateFromSearch);
             }
             else {
                 if (i == 0)
                 {
-                    onCampusButton.setText("On-Campus Crimes for " + date);
+                    onCampusButton.setText("On-Campus Crimes for " + dateFromSearch);
                     TableRow row = new TableRow(this);
                     // Create new row
 
@@ -237,7 +245,7 @@ public class MyActivity extends AppCompatActivity{
                 TextView reportNum = new TextView(this);
                 reportNum.setHeight(50);
                 reportNum.setMaxWidth(45);
-                info = onCampusCrimes[i];
+                info = crimes[i];
 
                 if (info != null && info.contains("null")) {
                     info = info.replaceAll("null", "");
@@ -249,7 +257,7 @@ public class MyActivity extends AppCompatActivity{
                 TextView incidentType = new TextView(this);
                 incidentType.setHeight(50);
                 incidentType.setMaxWidth(40);
-                info = onCampusCrimes[i + 5];
+                info = crimes[i + 5];
 
                 if (info != null && info.contains("null")) {
                     info = info.replaceAll("null", "");
@@ -261,7 +269,7 @@ public class MyActivity extends AppCompatActivity{
                 TextView location = new TextView(this);
                 location.setHeight(50);
                 location.setMaxWidth(40);
-                info = onCampusCrimes[i + 6];
+                info = crimes[i + 6];
 
                 if (info != null && info.contains("null")) {
                     info = info.replaceAll("null", "");
@@ -273,7 +281,7 @@ public class MyActivity extends AppCompatActivity{
                 TextView description = new TextView(this);
                 description.setHeight(50);
                 description.setMaxWidth(40);
-                info = onCampusCrimes[i + 7];
+                info = crimes[i + 7];
 
                 if (info != null && info.contains("null")) {
                     info = info.replaceAll("null", "");
