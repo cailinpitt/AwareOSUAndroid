@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.content.Intent;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -29,6 +30,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import android.app.Activity;
+import android.view.View;
+import android.app.DialogFragment;
 
 public class MyActivity extends AppCompatActivity{
     public final static String EXTRA_MESSAGE = "com.example.cailin.MESSAGE";
@@ -63,6 +68,8 @@ public class MyActivity extends AppCompatActivity{
         }
         // We now have crime information
 
+
+        Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
         offCampus();
         onCampus();
     }
@@ -86,7 +93,7 @@ public class MyActivity extends AppCompatActivity{
             else {
                 if (i == 0)
                 {
-                    offCampusButton.setText("On-Campus Crimes for " + date);
+                    offCampusButton.setText("Off-Campus Crimes for " + date);
                     TableRow row = new TableRow(this);
                     // Create new row
 
@@ -296,6 +303,13 @@ public class MyActivity extends AppCompatActivity{
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        else if (id == R.id.pick_date){
+            // Do date stuff
+            DialogFragment newFragment = new DatePickerFragment();
+            newFragment.show(getFragmentManager(),"Date Picker");
+
             return true;
         }
 
