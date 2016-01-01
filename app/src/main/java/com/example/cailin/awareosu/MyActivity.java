@@ -380,7 +380,13 @@ public class MyActivity extends AppCompatActivity{
         FragmentTransaction transaction = manager.beginTransaction();
         MapFragment fragment = new MapFragment();
         transaction.add(R.id.mapView, fragment);
+        transaction.addToBackStack(null);
         transaction.commit();
+    }
+    @Override
+    public void onBackPressed() {
+        //finish();
+        onCreate(null);
     }
     /**
      * Class to handle web scraping.

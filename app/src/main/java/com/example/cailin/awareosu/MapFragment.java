@@ -61,6 +61,8 @@ public class MapFragment extends Fragment {
                 .newCameraPosition(cameraPosition));
 
         // Perform any camera updates here
+
+
         return v;
     }
 
@@ -87,4 +89,6 @@ public class MapFragment extends Fragment {
         super.onLowMemory();
         mMapView.onLowMemory();
     }
+
+
 }
