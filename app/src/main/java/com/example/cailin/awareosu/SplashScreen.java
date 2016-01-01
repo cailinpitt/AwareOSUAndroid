@@ -73,10 +73,7 @@ public class SplashScreen extends Activity {
                 // Try to visit Columbus PD's website
             }
             catch(java.io.IOException ex){
-                offCampusCrimes[0] = "The Columbus Police Department's website is currently down. Please be sure to " +
-                        "check the CPD web portal (http://www.columbuspolice.org/reports/SearchLocation?" +
-                        "loc=zon4\\) later today or tomorrow for any updates.";
-
+                offCampusCrimes[0] = "down";
                 websiteDown = true;
                 // Website is down, handle case
             }
@@ -85,17 +82,25 @@ public class SplashScreen extends Activity {
                 Element crimeTable = doc.getElementById("MainContent_gvResults");
                 // HTML table holding yesterday's crimes
 
-                Elements crimeInfo = crimeTable.getElementsByTag("td");
-                // Get individual crime information
+                if (crimeTable != null) {
+                    Elements crimeInfo = crimeTable.getElementsByTag("td");
+                    // Get individual crime information
 
-                int counter = 0;
-                for (Element info : crimeInfo) {
-                    String linkText = info.text();
-                    offCampusCrimes[counter] += linkText;
-                    counter++;
-                    // Retrieve individual crime info
+                    int counter = 0;
+                    for (Element info : crimeInfo) {
+                        String linkText = info.text();
+                        offCampusCrimes[counter] += linkText;
+                        counter++;
+                        // Retrieve individual crime info
+                    }
+                }
+                else
+                {
+                    offCampusCrimes[0] = "empty";
                 }
             }
+
+            websiteDown = false;
 
             try {
                 String userAgent = System.getProperty("http.agent");
@@ -103,10 +108,7 @@ public class SplashScreen extends Activity {
                 // Try to visit OSU PD's website
             }
             catch(java.io.IOException ex){
-                onCampusCrimes[0] = "The OSU Police Department's website is currently down. Please be sure to " +
-                        "check the OSU web portal (http://www.ps.ohio-state.edu/police/daily_log/) " +
-                        "later today or tomorrow for any updates.";
-
+                onCampusCrimes[0] = "down";
                 websiteDown = true;
                 // Website is down, handle case
             }
@@ -115,12 +117,18 @@ public class SplashScreen extends Activity {
                 Elements crimeTable = doc.select("td.log");
                 // HTML table holding yesterday's crimes
 
-                int counter = 0;
-                for (Element info : crimeTable) {
-                    String linkText = info.text();
-                    onCampusCrimes[counter] += linkText;
-                    counter++;
-                    // Retrieve individual crime info
+                if (crimeTable.size() > 0) {
+                    int counter = 0;
+                    for (Element info : crimeTable) {
+                        String linkText = info.text();
+                        onCampusCrimes[counter] += linkText;
+                        counter++;
+                        // Retrieve individual crime info
+                    }
+                }
+                else
+                {
+                    onCampusCrimes[0] = "empty";
                 }
             }
 

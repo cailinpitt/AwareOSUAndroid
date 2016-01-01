@@ -13,6 +13,7 @@ import android.app.Fragment;
 import android.widget.DatePicker;
 import android.app.Dialog;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -30,6 +31,9 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
     public String[] offCampusCrimes;
     public String[] onCampusCrimes;
     public String date;
+    public int selectedMonth;
+    public int selectedDay;
+    public int selectedYear;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
@@ -51,6 +55,9 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         //Do something with the date chosen by the user
         //((MyActivity) getActivity()).onCampus();
         date = "" + (month + 1) + "/" + day + "/" + year;
+        selectedDay = day;
+        selectedMonth = month + 1;
+        selectedYear = year;
         // Update date that was searched
 
         try {
@@ -111,25 +118,33 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
                 Element crimeTable = doc.getElementById("MainContent_gvResults");
                 // HTML table holding yesterday's crimes
 
-                Elements crimeInfo = crimeTable.getElementsByTag("td");
-                // Get individual crime information
+                if (crimeTable != null) {
+                    Elements crimeInfo = crimeTable.getElementsByTag("td");
+                    // Get individual crime information
 
-                if (crimeInfo.size() == 0)
+                    int counter = 0;
+                    for (Element info : crimeInfo) {
+                        String linkText = info.text();
+                        offCampusCrimes[counter] += linkText;
+                        counter++;
+                        // Retrieve individual crime info
+                    }
+                }
+                else
                 {
                     offCampusCrimes[0] = "empty";
                 }
-                int counter = 0;
-                for (Element info : crimeInfo) {
-                    String linkText = info.text();
-                    offCampusCrimes[counter] += linkText;
-                    counter++;
-                    // Retrieve individual crime info
-                }
             }
+
+            websiteDown = false;
 
             try {
                 String userAgent = System.getProperty("http.agent");
-                doc = Jsoup.connect(OSUPD).timeout(10*1000).userAgent(userAgent).get();
+                Connection.Response res = Jsoup.connect("http://www.ps.ohio-state.edu/police/daily_log/view.php?phrase=&report_number=&from_month=12&from_day=22&from_year=2015&to_month=&to_day=&to_year=&view_col=report_date&view_cending=DESC&searching=Search")
+                        .timeout(10 * 1000)
+                        .userAgent(userAgent)
+                        .method(Connection.Method.POST).execute();
+                doc = res.parse();
                 // Try to visit OSU PD's website
             }
             catch(java.io.IOException ex){
@@ -139,6 +154,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
                 // Website is down, handle case
             }
 
+
             if (!websiteDown) {
                 Elements crimeTable = doc.select("td.log");
                 // HTML table holding yesterday's crimes
@@ -147,13 +163,15 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
                 {
                     onCampusCrimes[0] = "empty";
                 }
+                else {
 
-                int counter = 0;
-                for (Element info : crimeTable) {
-                    String linkText = info.text();
-                    onCampusCrimes[counter] += linkText;
-                    counter++;
-                    // Retrieve individual crime info
+                    int counter = 0;
+                    for (Element info : crimeTable) {
+                        String linkText = info.text();
+                        onCampusCrimes[counter] += linkText;
+                        counter++;
+                        // Retrieve individual crime info
+                    }
                 }
             }
             return null;
