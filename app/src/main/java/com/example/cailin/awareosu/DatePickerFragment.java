@@ -140,11 +140,21 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
 
             try {
                 String userAgent = System.getProperty("http.agent");
-                Connection.Response res = Jsoup.connect("http://www.ps.ohio-state.edu/police/daily_log/view.php?phrase=&report_number=&from_month=12&from_day=22&from_year=2015&to_month=&to_day=&to_year=&view_col=report_date&view_cending=DESC&searching=Search")
+                doc = Jsoup.connect("http://www.ps.ohio-state.edu/police/daily_log/view.php")
                         .timeout(10 * 1000)
                         .userAgent(userAgent)
-                        .method(Connection.Method.POST).execute();
-                doc = res.parse();
+                        .data("phrase", "")
+                        .data("report_number", "")
+                        .data("from_month", "" + selectedMonth)
+                        .data("from_day", "" + selectedDay)
+                        .data("from_year", "" + selectedYear)
+                        .data("to_month", "" + selectedMonth)
+                        .data("to_day", "" + selectedDay)
+                        .data("to_year", "" + selectedYear)
+                        .data("view_col", "report_date")
+                        .data("view_cending", "DESC")
+                        .data("searching", "Search")
+                        .post();
                 // Try to visit OSU PD's website
             }
             catch(java.io.IOException ex){
