@@ -16,15 +16,16 @@
             android:id = "@+id/offCampus_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAllCaps="false"
-            android:onClick="getCrimes" />
+            android:enabled="false"
+            android:textColor="#000000"
+            android:textAllCaps="false"/>
 
         <TextView
             android:id="@+id/off_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:gravity="center"
+            android:gravity="left"
             android:textSize="20sp" />
 
         <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -48,15 +49,16 @@
             android:layout_width="match_parent"
             android:id = "@+id/onCampus_button"
             android:layout_height="wrap_content"
-            android:textAllCaps="false"
-            android:onClick="getCrimes" />
+            android:enabled="false"
+            android:textColor="#000000"
+            android:textAllCaps="false"/>
 
         <TextView
             android:id="@+id/on_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:gravity="center"
+            android:gravity="left"
             android:textSize="20sp" />
 
         <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"

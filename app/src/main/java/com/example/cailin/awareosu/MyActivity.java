@@ -3,11 +3,7 @@ package com.example.cailin.awareosu;
 import java.util.*;
 import java.lang.*;
 import java.text.*;
-import java.util.concurrent.ExecutionException;
 
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,20 +19,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.content.Intent;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.graphics.Typeface;
-import android.content.Intent;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import android.app.Activity;
-import android.view.View;
 import android.app.DialogFragment;
 
 public class MyActivity extends AppCompatActivity{
@@ -52,15 +38,6 @@ public class MyActivity extends AppCompatActivity{
         setContentView(R.layout.activity_my);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Looking great today, Cailin!", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         Intent i = getIntent();
         offCampusCrimes = i.getStringArrayExtra("off");
@@ -78,6 +55,9 @@ public class MyActivity extends AppCompatActivity{
     }
 
     public void offCampus(String[] crimes, String[] links, String dateFromSearch) {
+        System.arraycopy(crimes, 0, offCampusCrimes, 0, crimes.length );
+        // Updated offCampusCrimes array
+
         TableLayout offCampusTable = (TableLayout) findViewById(R.id.off_campus);
         offCampusTable.removeAllViews();
         TextView offMessage = (TextView) findViewById(R.id.off_message);
@@ -98,18 +78,25 @@ public class MyActivity extends AppCompatActivity{
             else if (crimes[0].equals("down"))
             {
                 offCampusButton.setText("Website down");
-                offMessage.setText("The Columbus Police Department's website is currently down. Please be sure to " +
-                    "check the CPD web portal (http://www.columbuspolice.org/reports/SearchLocation?" +
-                    "loc=zon4\\) later today or tomorrow for any updates.");
+                offMessage.setClickable(true);
+                offMessage.setMovementMethod(LinkMovementMethod.getInstance());
+                offMessage.setText(Html.fromHtml("The Columbus Police Department's website is " +
+                        "currently down.<br><br>Please be sure to check the " +
+                        "<a href='http://www.columbuspolice.org/reports/SearchLocation?loc=zon4'>CPD " +
+                        "web portal</a> later today or tomorrow for any updates."));
                 i = crimes.length;
             }
             else if (crimes[0].equals("empty"))
             {
                 offCampusButton.setText("No Off-Campus Crimes reported for " + dateFromSearch);
-                offMessage.setText("This is due to either the Columbus Police Department forgetting " +
-                        "to upload crime information, or there being no crimes. Please be sure to " +
-                        "check the CPD web portal (http://www.columbuspolice.org/reports/SearchLocation?" +
-                        "loc=zon4\\) later today or tomorrow for any updates.");
+                offMessage.setClickable(true);
+                offMessage.setMovementMethod(LinkMovementMethod.getInstance());
+                offMessage.setSingleLine(false);
+                offMessage.setText(Html.fromHtml("This is due to either:<br> &#8226; The Columbus Police Department forgetting " +
+                        "to upload crime information<br> &#8226; Attempting to retrieve crime information before " +
+                        "it has been uploaded<br> &#8226; No crimes have occurred on this day<br><br> Please be sure to " +
+                        "check the <a href='http://www.columbuspolice.org/reports/SearchLocation?loc=zon4'>CPD " +
+                        "web portal</a> later today or tomorrow for any updates."));
                 i = crimes.length;
             }
             else {
@@ -206,6 +193,9 @@ public class MyActivity extends AppCompatActivity{
     }
 
     public void onCampus(String[] crimes, String dateFromSearch) {
+        System.arraycopy(crimes, 0, onCampusCrimes, 0, crimes.length );
+        // Updated onCampusCrimes array
+
         TableLayout onCampusTable = (TableLayout) findViewById(R.id.on_campus);
         onCampusTable.removeAllViews();
         TableLayout onCampusHeaderTable = (TableLayout) findViewById(R.id.onHeader_table);
@@ -224,19 +214,23 @@ public class MyActivity extends AppCompatActivity{
             else if (crimes[0].equals("down"))
             {
                 onCampusButton.setText("Website down");
-                onMessage.setText("The OSU Police Department's website is currently down. " +
-                        "Please be sure to check the OSU web portal " +
-                        "(http://www.ps.ohio-state.edu/police/daily_log/) " +
-                        "later today or tomorrow for any updates.");
+                onMessage.setClickable(true);
+                onMessage.setMovementMethod(LinkMovementMethod.getInstance());
+                onMessage.setText(Html.fromHtml("The OSU Police Department's website is currently down.\n" +
+                        "Please be sure to check the <a href='http://www.ps.ohio-state.edu/police/daily_log/'>OSU web portal</a>" +
+                        " later today or tomorrow for any updates."));
                 i = crimes.length;
             }
             else if (crimes[0].equals("empty"))
             {
                 onCampusButton.setText("No On-Campus Crimes reported for " + dateFromSearch);
-                onMessage.setText("This is due to either the OSU Police Department forgetting " +
-                        "to upload crime information, or there being no crimes. Please be sure to " +
-                        "check the OSU web portal (http://www.ps.ohio-state.edu/police/daily_log/) " +
-                        "later today or tomorrow for any updates.");
+                onMessage.setClickable(true);
+                onMessage.setMovementMethod(LinkMovementMethod.getInstance());
+                onMessage.setText(Html.fromHtml("This is due to either:<br> &#8226; The Ohio State Police Department forgetting " +
+                        "to upload crime information<br> &#8226; Attempting to retrieve crime information before " +
+                        "it has been uploaded<br> &#8226; No crimes have occurred on this day<br><br> Please be sure to " +
+                        "check the <a href='http://www.ps.ohio-state.edu/police/daily_log/'>OSU " +
+                        "web portal</a> later today or tomorrow for any updates."));
                 i = crimes.length;
             }
             else {
@@ -360,6 +354,9 @@ public class MyActivity extends AppCompatActivity{
         else if (id == R.id.show_map){
             // Do map fragment
 
+            String[] crimeLocations = getLocations(offCampusCrimes, onCampusCrimes);
+            // Get locations of crimes, pass to map fragment
+
             setContentView(R.layout.activity_map_fragment);
             addMapFragment();
 
@@ -389,5 +386,57 @@ public class MyActivity extends AppCompatActivity{
     public void onBackPressed() {
         //finish();
         onCreate(null);
+    }
+
+    /*
+        Retrieves locations of crimes currently displayed in MyActivity
+     */
+    public String[] getLocations(String[] offCampusCrimeInfo, String[] onCampusCrimeInfo)
+    {
+        String[] locations = new String[offCampusCrimeInfo.length + onCampusCrimeInfo.length];
+        String[] result;
+        int counter = 0;
+        // Declare variables
+
+        for (int i = 0; i < offCampusCrimeInfo.length; i += 5)
+        {
+            if ((i + 4) <= offCampusCrimeInfo.length) {
+                String location = offCampusCrimeInfo[i + 4];
+                // Get location
+
+                if (location != null) {
+                    // If valid location, add to result array
+                    locations[counter] = location.replaceAll("null", "");
+                    counter++;
+                }
+            }
+        }
+        // Off campus
+
+        for (int i = 0; i < onCampusCrimeInfo.length; i += 8)
+        {
+            if ((i + 6) <= onCampusCrimeInfo.length) {
+                String location = onCampusCrimeInfo[i + 6];
+                // Get location
+
+                if (location != null) {
+                    // If valid location, add to result array
+                    locations[counter] = location.replaceAll("null", "");
+                    counter++;
+                }
+            }
+        }
+        // On campus
+
+        result = new String[counter];
+        // Initialize result array
+
+        for (int i = 0; i < result.length; i++)
+        {
+            result[i] = locations[i];
+        }
+        // Copy location to new array with correct size
+
+        return result;
     }
 }

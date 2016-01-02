@@ -89,6 +89,4 @@ public class MapFragment extends Fragment {
         super.onLowMemory();
         mMapView.onLowMemory();
     }
-
-
 }
