@@ -15,6 +15,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
@@ -41,6 +43,7 @@ public class MyActivity extends AppCompatActivity{
     public final static String EXTRA_MESSAGE = "com.example.cailin.MESSAGE";
     public String[] offCampusCrimes;
     public String[] onCampusCrimes;
+    public String[] offCampusCrimeLinks;
     public String date;
 
     @Override
@@ -58,20 +61,11 @@ public class MyActivity extends AppCompatActivity{
                         .setAction("Action", null).show();
             }
         });
-/*
-        try {
-            String[] info = new RetrieveCrimes().execute().get();
-            // Make main thread wait until crime info is retrieved
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        // We now have crime information
-**/
+
         Intent i = getIntent();
         offCampusCrimes = i.getStringArrayExtra("off");
         onCampusCrimes = i.getStringArrayExtra("on");
+        offCampusCrimeLinks = i.getStringArrayExtra("offLinks");
         // Get web scraped info from splash screen
 
         Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
@@ -79,20 +73,23 @@ public class MyActivity extends AppCompatActivity{
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DATE, -1);
-        offCampus(offCampusCrimes, dateFormat.format(cal.getTime()));
+        offCampus(offCampusCrimes, offCampusCrimeLinks, dateFormat.format(cal.getTime()));
         onCampus(onCampusCrimes, dateFormat.format(cal.getTime()));
     }
 
-    public void offCampus(String[] crimes, String dateFromSearch) {
+    public void offCampus(String[] crimes, String[] links, String dateFromSearch) {
         TableLayout offCampusTable = (TableLayout) findViewById(R.id.off_campus);
         offCampusTable.removeAllViews();
         TextView offMessage = (TextView) findViewById(R.id.off_message);
+        offMessage.setText("");
         TableLayout offCampusHeaderTable = (TableLayout) findViewById(R.id.offHeader_table);
         offCampusHeaderTable.removeAllViews();
         Button offCampusButton = (Button) findViewById(R.id.offCampus_button);
         String info = "";
+        String crimeLink = "<a href='placeholder'>Crime Report</a>";
         // Access off-campus table and create variables
 
+        int j = 1;
         for (int i = 0; i < crimes.length; i += 5) {
             if (crimes[i] == null)
             {
@@ -194,7 +191,12 @@ public class MyActivity extends AppCompatActivity{
                 TextView description = new TextView(this);
                 description.setHeight(50);
                 description.setMaxWidth(40);
-                description.setText("-");
+                description.setClickable(true);
+                description.setMovementMethod(LinkMovementMethod.getInstance());
+                info = links[j];
+                j++;
+
+                description.setText(Html.fromHtml(crimeLink.replaceAll("placeholder", "http://www.columbuspolice.org/reports/PublicReport?caseID=" + info)));
                 row.addView(description);
                 // Add location to row
 
@@ -209,6 +211,7 @@ public class MyActivity extends AppCompatActivity{
         TableLayout onCampusHeaderTable = (TableLayout) findViewById(R.id.onHeader_table);
         onCampusHeaderTable.removeAllViews();
         TextView onMessage = (TextView) findViewById(R.id.on_message);
+        onMessage.setText("");
         Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
         String info = "";
         // Access off-campus table and create variables

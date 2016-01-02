@@ -24,6 +24,7 @@ public class SplashScreen extends Activity {
 
     public String[] offCampusCrimes;
     public String[] onCampusCrimes;
+    public String[] offCampusCrimeLinks;
     public String date;
 
     @Override
@@ -36,23 +37,12 @@ public class SplashScreen extends Activity {
          * data before launching the app Will use AsyncTask to make http call
          */
         new RetrieveCrimes().execute();
-
     }
 
     /**
      * Class to handle web scraping.
      */
     public class RetrieveCrimes extends AsyncTask<Void, Void, String[]> {
-        private final Context RetrieveCrimes = null;
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            ProgressDialog pd = new ProgressDialog(RetrieveCrimes);
-            pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            pd.setMessage("Working...");
-            pd.setIndeterminate(true);
-            pd.setCancelable(false);
-        }
 
         @Override
         protected String[] doInBackground(Void... arg0) {
@@ -60,6 +50,7 @@ public class SplashScreen extends Activity {
 
             offCampusCrimes = new String[500];
             onCampusCrimes = new String[500];
+
             date = getYesterdaysDate();
             String columbusPD = "http://www.columbuspolice.org/reports/Results?from=placeholder&to=placeholder&loc=zon4&types=9";
             String OSUPD = "http://www.ps.ohio-state.edu/police/daily_log/view.php?date=yesterday";
@@ -84,9 +75,22 @@ public class SplashScreen extends Activity {
 
                 if (crimeTable != null) {
                     Elements crimeInfo = crimeTable.getElementsByTag("td");
+                    Elements trElements = crimeTable.getElementsByTag("tr");
                     // Get individual crime information
 
                     int counter = 0;
+                    offCampusCrimeLinks = new String[trElements.size()];
+                    for (Element crime : trElements) {
+                        if (counter != 0) {
+                            int indexOfParenthesis = crime.attr("onclick").indexOf(")");
+                            String reportNum = crime.attr("onclick").substring(11, indexOfParenthesis);
+                            offCampusCrimeLinks[counter] = reportNum;
+                            // Get links to each individual crime report
+                        }
+                        counter++;
+                    }
+
+                    counter = 0;
                     for (Element info : crimeInfo) {
                         String linkText = info.text();
                         offCampusCrimes[counter] += linkText;
@@ -135,6 +139,7 @@ public class SplashScreen extends Activity {
             Intent i = new Intent(SplashScreen.this, MyActivity.class);
             i.putExtra("off", offCampusCrimes);
             i.putExtra("on", onCampusCrimes);
+            i.putExtra("offLinks", offCampusCrimeLinks);
             startActivity(i);
 
             // close this activity

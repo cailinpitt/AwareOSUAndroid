@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
     public String[] offCampusCrimes;
     public String[] onCampusCrimes;
+    public String[] offCampusCrimeLinks;
     public String date;
     public int selectedMonth;
     public int selectedDay;
@@ -70,7 +71,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         }
         // We now have crime information
 
-        ((MyActivity) getActivity()).offCampus(offCampusCrimes, date);
+        ((MyActivity) getActivity()).offCampus(offCampusCrimes, offCampusCrimeLinks, date);
         ((MyActivity) getActivity()).onCampus(onCampusCrimes, date);
         // Load layout tables with information
     }
@@ -120,9 +121,22 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
 
                 if (crimeTable != null) {
                     Elements crimeInfo = crimeTable.getElementsByTag("td");
+                    Elements trElements = crimeTable.getElementsByTag("tr");
                     // Get individual crime information
 
                     int counter = 0;
+                    offCampusCrimeLinks = new String[trElements.size()];
+                    for (Element crime : trElements) {
+                        if (counter != 0) {
+                            int indexOfParenthesis = crime.attr("onclick").indexOf(")");
+                            String reportNum = crime.attr("onclick").substring(11, indexOfParenthesis);
+                            offCampusCrimeLinks[counter] = reportNum;
+                            // Get links to each individual crime report
+                        }
+                        counter++;
+                    }
+
+                    counter = 0;
                     for (Element info : crimeInfo) {
                         String linkText = info.text();
                         offCampusCrimes[counter] += linkText;
