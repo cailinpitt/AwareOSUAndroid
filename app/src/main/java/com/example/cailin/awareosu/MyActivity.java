@@ -4,6 +4,10 @@ import java.util.*;
 import java.lang.*;
 import java.text.*;
 
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -25,12 +29,15 @@ import android.widget.TextView;
 import android.graphics.Typeface;
 import android.app.DialogFragment;
 
+import com.google.android.gms.maps.model.LatLng;
+
 public class MyActivity extends AppCompatActivity{
     public final static String EXTRA_MESSAGE = "com.example.cailin.MESSAGE";
     public String[] offCampusCrimes;
     public String[] onCampusCrimes;
     public String[] offCampusCrimeLinks;
     public String date;
+    private Geocoder coder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +45,8 @@ public class MyActivity extends AppCompatActivity{
         setContentView(R.layout.activity_my);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        coder = new Geocoder(getBaseContext());
 
         Intent i = getIntent();
         offCampusCrimes = i.getStringArrayExtra("off");
@@ -55,7 +64,7 @@ public class MyActivity extends AppCompatActivity{
     }
 
     public void offCampus(String[] crimes, String[] links, String dateFromSearch) {
-        System.arraycopy(crimes, 0, offCampusCrimes, 0, crimes.length );
+        System.arraycopy(crimes, 0, offCampusCrimes, 0, crimes.length);
         // Updated offCampusCrimes array
 
         TableLayout offCampusTable = (TableLayout) findViewById(R.id.off_campus);
@@ -193,7 +202,7 @@ public class MyActivity extends AppCompatActivity{
     }
 
     public void onCampus(String[] crimes, String dateFromSearch) {
-        System.arraycopy(crimes, 0, onCampusCrimes, 0, crimes.length );
+        System.arraycopy(crimes, 0, onCampusCrimes, 0, crimes.length);
         // Updated onCampusCrimes array
 
         TableLayout onCampusTable = (TableLayout) findViewById(R.id.on_campus);
@@ -355,7 +364,8 @@ public class MyActivity extends AppCompatActivity{
             // Do map fragment
 
             String[] crimeLocations = getLocations(offCampusCrimes, onCampusCrimes);
-            // Get locations of crimes, pass to map fragment
+            Double[] latLong = getLocationFromAddress(crimeLocations);
+            // Get array containing lat + long of crimes, needed for map
 
             setContentView(R.layout.activity_map_fragment);
             addMapFragment();
@@ -439,4 +449,31 @@ public class MyActivity extends AppCompatActivity{
 
         return result;
     }
+
+
+    public Double[] getLocationFromAddress(String[] addresses) {
+        Double[] result = new Double[addresses.length];
+        List<Address> address;
+        LatLng p1 = null;
+
+        int j = 0;
+        for (int i = 0; i < addresses.length; i++) {
+            try {
+                address = coder.getFromLocationName(addresses[i], 5);
+                if (address != null) {
+                    Address location = address.get(0);
+
+                    result[j] = location.getLatitude();
+                    result[j + 1] = location.getLongitude();
+                    // Add lat & long to result array
+                    j += 2;
+                }
+
+            } catch (Exception ex) {
+                // Do nothing
+            }
+        }
+        return result;
+    }
 }
+
