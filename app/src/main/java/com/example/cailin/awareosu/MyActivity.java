@@ -364,11 +364,12 @@ public class MyActivity extends AppCompatActivity{
             // Do map fragment
 
             String[] crimeLocations = getLocations(offCampusCrimes, onCampusCrimes);
+            String crimeInfo[] = getCrimeInfo(offCampusCrimes, onCampusCrimes);
             double[] latLong = getLocationFromAddress(crimeLocations);
             // Get array containing lat + long of crimes, needed for map
 
             setContentView(R.layout.activity_map_fragment);
-            addMapFragment(latLong);
+            addMapFragment(latLong, crimeInfo);
 
             return true;
         }
@@ -376,15 +377,7 @@ public class MyActivity extends AppCompatActivity{
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Called when the user clicks the Send button
-     */
-    public void getCrimes(View view) {
-        Intent intent = new Intent(this, DisplayMessageActivity.class);
-        startActivity(intent);
-    }
-
-    private void addMapFragment(double[] locations) {
+    private void addMapFragment(double[] locations, String[] crimeInfo) {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         MapFragment fragment = new MapFragment();
@@ -393,6 +386,7 @@ public class MyActivity extends AppCompatActivity{
 
         Bundle args = new Bundle();
         args.putDoubleArray("locations", locations);
+        args.putStringArray("info", crimeInfo);
         fragment.setArguments(args);
         // Pass location array to map fragment
 
@@ -456,28 +450,115 @@ public class MyActivity extends AppCompatActivity{
         return result;
     }
 
+    public String[] getCrimeInfo(String[] offCampusCrimeInfo, String[] onCampusCrimeInfo)
+    {
+        String[] info = new String[offCampusCrimeInfo.length + onCampusCrimeInfo.length];
+        String[] result;
+        int counter = 0;
+        // Declare variables
+
+        for (int i = 0; i < offCampusCrimeInfo.length; i += 5) {
+            if ((i + 1) < offCampusCrimeInfo.length) {
+                String crimeInfo = offCampusCrimeInfo[i + 1];
+                // Get incident type
+
+                if (offCampusCrimeInfo[i + 1] != null) {
+                    // If valid location, add to result array
+                    info[counter] = crimeInfo.replaceAll("null", "");
+                    counter++;
+                }
+            }
+        }
+        // Off campus
+
+        for (int i = 0; i < onCampusCrimeInfo.length; i += 8)
+        {
+            if ((i + 5) < onCampusCrimeInfo.length) {
+                String crimeInfo = onCampusCrimeInfo[i + 5];
+                // Get incident type
+
+                if (onCampusCrimeInfo[i + 5] != null) {
+                    // If valid location, add to result array
+                    info[counter] = crimeInfo.replaceAll("null", "");
+                    counter++;
+                }
+            }
+
+        }
+        // On campus
+
+        result = new String[counter];
+        // Initialize result array
+
+        for (int i = 0; i < result.length; i++)
+        {
+            result[i] = info[i];
+        }
+        // Copy location to new array with correct size
+
+        return result;
+    }
 
     public double[] getLocationFromAddress(String[] addresses) {
         double[] result = new double[addresses.length * 2];
         List<Address> address;
         LatLng p1 = null;
+        int i;
 
         int j = 0;
-        for (int i = 0; i < addresses.length; i++) {
+        for (i = 0; i < addresses.length; i++) {
             try {
-                address = coder.getFromLocationName(addresses[i], 5);
+                String addressToSearch = addresses[i].replaceAll("&(?!amp;)", "and");
+                // '&' throws address search off. Replace w/ 'and'
+                address = coder.getFromLocationName(addressToSearch, 5);
                 if (address != null) {
                     Address location = address.get(0);
 
-                    result[j] = location.getLatitude();
-                    result[j + 1] = location.getLongitude();
-                    // Add lat & long to result array
-                    j += 2;
+                    String add = location.getAddressLine(1);
+
+                    if (add.contains("Columbus, OH")) {
+                        if (Double.compare(location.getLatitude(), 0.0) != 0) {
+                            result[j] = location.getLatitude();
+                            result[j + 1] = location.getLongitude();
+                            // Add lat & long to result array
+                        }
+                        else
+                        {
+                            result[j] = -1;
+                            result[j + 1] = -1;
+                            // This means we couldn't find the lat & long from the search.
+                            // We won't add that location to the map.
+                        }
+                    }
+                    else
+                    {
+                        // Else Google is having trouble finding coordinates because it is an on campus address.
+                        // Do some creative searching.
+                        List<Address> search = coder.getFromLocationName(add + " Columbus, Ohio", 5);
+                        location = search.get(0);
+
+                        if (Double.compare(location.getLatitude(), 0.0) != 0) {
+                            result[j] = location.getLatitude();
+                            result[j + 1] = location.getLongitude();
+                        }
+                        else
+                        {
+                            result[j] = -1;
+                            result[j + 1] = -1;
+                            // This means we couldn't find the lat & long from the search.
+                            // We won't add that location to the map.
+                        }
+                    }
                 }
 
             } catch (Exception ex) {
-                // Do nothing
+                result[j] = -1;
+                result[j + 1] = -1;
+                // This means we couldn't find the lat & long from the search.
+                // We won't add that location to the map.
             }
+
+            j += 2;
         }
         return result;
     }

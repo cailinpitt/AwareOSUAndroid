@@ -23,13 +23,20 @@ public class MapFragment extends Fragment {
     MapView mMapView;
     private GoogleMap googleMap;
     public double[] locations;
+    public String[] crimeInfo;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         Bundle args = getArguments();
         locations = args.getDoubleArray("locations");
+        crimeInfo = args.getStringArray("info");
         // Retrieve locations from main activity
+
+        double latitude = 40.006329;
+        double longitude = -83.016880;
+        // Default is OSU, in case no locations are found
 
         // inflate and return the layout
         View v = inflater.inflate(R.layout.activity_map_fragment, container,
@@ -47,29 +54,43 @@ public class MapFragment extends Fragment {
 
         googleMap = mMapView.getMap();
 
+       // currentLocationIcon = BitmapDescriptorFactory.fromResource(R.drawable.map_icon);
+
+        int j = 0;
         for (int i = 0; i < locations.length; i += 2) {
             // latitude and longitude
-            double latitude = locations[i];
-            double longitude = locations[i + 1];
+            latitude = locations[i];
+            longitude = locations[i + 1];
 
-            // create marker
-            MarkerOptions marker = new MarkerOptions().position(
-                    new LatLng(latitude, longitude)).title("Columbus, Ohio");
+            if (Double.compare(locations[i], -1.0) != 0)
+            {
+                // This means valid lat & long were found for address
 
+                // create marker
+                MarkerOptions marker = new MarkerOptions().position(
+                        new LatLng(latitude, longitude)).title(crimeInfo[j]);
 
+                BitmapDescriptorFactory.fromResource(R.drawable.map_icon);
+                // Initialize BitmapDescriptorFactory
 
-            // Changing marker icon
-            marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+                // Changing marker icon
+                marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
 
-            // adding marker
-            googleMap.addMarker(marker);
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(latitude, longitude)).zoom(12).build();
-            googleMap.animateCamera(CameraUpdateFactory
-                    .newCameraPosition(cameraPosition));
-
-            // Perform any camera updates here
+                // adding marker
+                googleMap.addMarker(marker);
+            }
+            j++;
         }
+
+
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(new LatLng(40.006329, -83.016880)).zoom(12).build();
+        // Zoom into campus area
+
+        googleMap.animateCamera(CameraUpdateFactory
+                .newCameraPosition(cameraPosition));
+
+        // Perform any camera updates here
 
         return v;
     }
