@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/splash_background" >
+    android:background="#ffffff" >
 
     <ImageView
         android:id="@+id/imgLogo"
@@ -19,5 +19,4 @@
         android:textColor="#454545"
         android:gravity="center_horizontal"
         android:layout_alignParentBottom="true" />
-
 </RelativeLayout>

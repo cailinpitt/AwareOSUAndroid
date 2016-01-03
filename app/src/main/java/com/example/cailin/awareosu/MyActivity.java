@@ -364,11 +364,11 @@ public class MyActivity extends AppCompatActivity{
             // Do map fragment
 
             String[] crimeLocations = getLocations(offCampusCrimes, onCampusCrimes);
-            Double[] latLong = getLocationFromAddress(crimeLocations);
+            double[] latLong = getLocationFromAddress(crimeLocations);
             // Get array containing lat + long of crimes, needed for map
 
             setContentView(R.layout.activity_map_fragment);
-            addMapFragment();
+            addMapFragment(latLong);
 
             return true;
         }
@@ -384,12 +384,18 @@ public class MyActivity extends AppCompatActivity{
         startActivity(intent);
     }
 
-    private void addMapFragment() {
+    private void addMapFragment(double[] locations) {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         MapFragment fragment = new MapFragment();
         transaction.add(R.id.mapView, fragment);
         transaction.addToBackStack(null);
+
+        Bundle args = new Bundle();
+        args.putDoubleArray("locations", locations);
+        fragment.setArguments(args);
+        // Pass location array to map fragment
+
         transaction.commit();
     }
     @Override
@@ -416,7 +422,7 @@ public class MyActivity extends AppCompatActivity{
 
                 if (location != null) {
                     // If valid location, add to result array
-                    locations[counter] = location.replaceAll("null", "");
+                    locations[counter] = (location + " Columbus, Ohio").replaceAll("null", "");
                     counter++;
                 }
             }
@@ -431,7 +437,7 @@ public class MyActivity extends AppCompatActivity{
 
                 if (location != null) {
                     // If valid location, add to result array
-                    locations[counter] = location.replaceAll("null", "");
+                    locations[counter] = (location + " The Ohio State University").replaceAll("null", "");
                     counter++;
                 }
             }
@@ -451,8 +457,8 @@ public class MyActivity extends AppCompatActivity{
     }
 
 
-    public Double[] getLocationFromAddress(String[] addresses) {
-        Double[] result = new Double[addresses.length];
+    public double[] getLocationFromAddress(String[] addresses) {
+        double[] result = new double[addresses.length * 2];
         List<Address> address;
         LatLng p1 = null;
 
