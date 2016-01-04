@@ -8,6 +8,7 @@ import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -17,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
@@ -36,6 +38,7 @@ public class MyActivity extends AppCompatActivity{
     public String[] offCampusCrimes;
     public String[] onCampusCrimes;
     public String[] offCampusCrimeLinks;
+    public FragmentManager manager;
     public String date;
     private Geocoder coder;
 
@@ -45,7 +48,6 @@ public class MyActivity extends AppCompatActivity{
         setContentView(R.layout.activity_my);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         coder = new Geocoder(getBaseContext());
 
         Intent i = getIntent();
@@ -61,6 +63,14 @@ public class MyActivity extends AppCompatActivity{
         cal.add(Calendar.DATE, -1);
         offCampus(offCampusCrimes, offCampusCrimeLinks, dateFormat.format(cal.getTime()));
         onCampus(onCampusCrimes, dateFormat.format(cal.getTime()));
+
+        FragmentManager fm = getSupportFragmentManager();
+        fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                if(getSupportFragmentManager().getBackStackEntryCount() == 0) finish();
+            }
+        });
     }
 
     public void offCampus(String[] crimes, String[] links, String dateFromSearch) {
@@ -357,7 +367,6 @@ public class MyActivity extends AppCompatActivity{
             // Do date stuff
             DialogFragment newFragment = new DatePickerFragment();
             newFragment.show(getFragmentManager(),"Date Picker");
-
             return true;
         }
         else if (id == R.id.show_map){
@@ -370,7 +379,6 @@ public class MyActivity extends AppCompatActivity{
 
             setContentView(R.layout.activity_map_fragment);
             addMapFragment(latLong, crimeInfo);
-
             return true;
         }
 
@@ -378,24 +386,25 @@ public class MyActivity extends AppCompatActivity{
     }
 
     private void addMapFragment(double[] locations, String[] crimeInfo) {
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
+
+        manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction().addToBackStack(null);
         MapFragment fragment = new MapFragment();
         transaction.add(R.id.mapView, fragment);
-        transaction.addToBackStack(null);
 
         Bundle args = new Bundle();
         args.putDoubleArray("locations", locations);
         args.putStringArray("info", crimeInfo);
         fragment.setArguments(args);
         // Pass location array to map fragment
-
         transaction.commit();
     }
+
     @Override
     public void onBackPressed() {
         //finish();
-        onCreate(null);
+        startActivity(new Intent(this,SplashScreen.class));
+        this.finish();
     }
 
     /*
