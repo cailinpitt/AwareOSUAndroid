@@ -12,6 +12,7 @@ import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -48,7 +49,14 @@ public class MyActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        notifyUser();
+        SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        String notificationPreference = SP.getString("getNotification", "1");
+        if (notificationPreference.equals("1")) {
+            notifyUser();
+            // User has selected the option to be notified of crimes
+        }
+        // We want user to always be notified of crimes until they selected "no notifications"
+        // in settings page
 
         setContentView(R.layout.activity_my);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -110,6 +118,8 @@ public class MyActivity extends AppCompatActivity{
                 if(getSupportFragmentManager().getBackStackEntryCount() == 0) finish();
             }
         });
+
+        PreferenceManager.setDefaultValues(this, R.xml.settings, false);
     }
 
     public void offCampus(String[] crimes, String[] links, String dateFromSearch) {
@@ -432,6 +442,29 @@ public class MyActivity extends AppCompatActivity{
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent i = new Intent(this, UserSettingsActivity.class);
+            startActivity(i);
+
+            SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+            String notificationPreference = SP.getString("getNotification", "1");
+            if (notificationPreference.equals("1")) {
+                notifyUser();
+                // User has selected the option to be notified of crimes
+            }
+            else
+            {
+                NotificationManager mNotificationManager =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                // mId allows you to update the notification later on.
+                // mNotificationManager.notify(mId, mBuilder.build());
+
+                // Sets an ID for the notification
+                int mNotificationId = 001;
+
+                // Cancels notification.
+                mNotificationManager.cancel(mNotificationId);
+            }
             return true;
         }
         else if (id == R.id.pick_date){
@@ -697,7 +730,7 @@ public class MyActivity extends AppCompatActivity{
         AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 
         //set the alarm for particular time
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), PendingIntent.getBroadcast(this,1,  intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT));
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), PendingIntent.getBroadcast(this, 1, intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT));
     }
 }
 
