@@ -1,6 +1,10 @@
 package com.example.cailin.awareosu;
 
+import android.app.AlarmManager;
 import android.app.DialogFragment;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +15,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -42,6 +47,8 @@ public class MyActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        notifyUser();
 
         setContentView(R.layout.activity_my);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -678,33 +685,19 @@ public class MyActivity extends AppCompatActivity{
         return result;
     }
 
-    private static Intent getIntent(Context context, Class<?> cls) {
-        Intent intent = new Intent(context, cls);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        return intent;
-    }
+    public void notifyUser()
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 10);
+        calendar.set(Calendar.MINUTE, 15);
+        calendar.set(Calendar.SECOND, 00);
+        // Set notification date
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putStringArray("off", offCampusCrimes);
-        outState.putStringArray("on", onCampusCrimes);
-        outState.putStringArray("links", offCampusCrimeLinks);
-        outState.putString("date", date);
+        Intent intentAlarm = new Intent(this , AlarmReceiver.class);
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 
-
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        active = true;
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        active = false;
+        //set the alarm for particular time
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), PendingIntent.getBroadcast(this,1,  intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT));
     }
 }
 
