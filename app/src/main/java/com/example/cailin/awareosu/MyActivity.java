@@ -1,37 +1,33 @@
 package com.example.cailin.awareosu;
 
-import java.util.*;
-import java.lang.*;
-import java.text.*;
-
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.content.Intent;
 import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.graphics.Typeface;
-import android.app.DialogFragment;
 
 import com.google.android.gms.maps.model.LatLng;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
 
 public class MyActivity extends AppCompatActivity{
     public final static String EXTRA_MESSAGE = "com.example.cailin.MESSAGE";
@@ -41,28 +37,64 @@ public class MyActivity extends AppCompatActivity{
     public FragmentManager manager;
     public String date;
     private Geocoder coder;
+    static boolean active = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_my);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         coder = new Geocoder(getBaseContext());
 
-        Intent i = getIntent();
-        offCampusCrimes = i.getStringArrayExtra("off");
-        onCampusCrimes = i.getStringArrayExtra("on");
-        offCampusCrimeLinks = i.getStringArrayExtra("offLinks");
-        // Get web scraped info from splash screen
 
-        Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
+        SharedPreferences settings = getSharedPreferences("crimeInfo", 0);
+        String temp = settings.getString("off", null);
 
-        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, -1);
-        offCampus(offCampusCrimes, offCampusCrimeLinks, dateFormat.format(cal.getTime()));
-        onCampus(onCampusCrimes, dateFormat.format(cal.getTime()));
+        SharedPreferences.Editor editor = settings.edit();
+
+        if (temp != null) {
+            offCampusCrimes = temp.split("#");
+            editor.remove("off");
+
+            temp = settings.getString("on", null);
+            onCampusCrimes = temp.split("#");
+            editor.remove("on");
+
+            temp = settings.getString("links", null).replaceAll("null,", "");
+            if (temp.length() == 0)
+            {
+                offCampusCrimeLinks = null;
+            }
+            else {
+                offCampusCrimeLinks = temp.split("#");
+                editor.remove("links");
+            }
+
+            date = settings.getString("date", null);
+            editor.remove("date");
+
+            editor.commit();
+
+            // We just came from map fragment, load previous info and display
+        }
+        else
+        {
+            Intent i = getIntent();
+            offCampusCrimes = i.getStringArrayExtra("off");
+            onCampusCrimes = i.getStringArrayExtra("on");
+            offCampusCrimeLinks = i.getStringArrayExtra("offLinks");
+            // Get web scraped info from splash screen
+
+            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DATE, -1);
+            date = dateFormat.format(cal.getTime());
+        }
+
+        offCampus(offCampusCrimes, offCampusCrimeLinks, date);
+        onCampus(onCampusCrimes, date);
 
         FragmentManager fm = getSupportFragmentManager();
         fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
@@ -74,6 +106,9 @@ public class MyActivity extends AppCompatActivity{
     }
 
     public void offCampus(String[] crimes, String[] links, String dateFromSearch) {
+        date = dateFromSearch;
+        // Update date
+
         System.arraycopy(crimes, 0, offCampusCrimes, 0, crimes.length);
         // Updated offCampusCrimes array
 
@@ -85,7 +120,7 @@ public class MyActivity extends AppCompatActivity{
         offCampusHeaderTable.removeAllViews();
         Button offCampusButton = (Button) findViewById(R.id.offCampus_button);
         String info = "";
-        String crimeLink = "<a href='placeholder'>Crime Report</a>";
+        String crimeLink = "<a href='placeholder'>Report</a>";
         // Access off-campus table and create variables
 
         int j = 1;
@@ -96,16 +131,15 @@ public class MyActivity extends AppCompatActivity{
             }
             else if (crimes[0].equals("down"))
             {
-                offCampusButton.setText("Website down");
+                offCampusButton.setText("Website down/not loading");
                 offMessage.setClickable(true);
                 offMessage.setMovementMethod(LinkMovementMethod.getInstance());
                 offMessage.setText(Html.fromHtml("The Columbus Police Department's website is " +
-                        "currently down.<br><br>Please be sure to check the " +
+                        "currently unreachable.<br><br>Please be sure to check the " +
                         "<a href='http://www.columbuspolice.org/reports/SearchLocation?loc=zon4'>CPD " +
                         "web portal</a> later today or tomorrow for any updates."));
                 i = crimes.length;
-            }
-            else if (crimes[0].equals("empty"))
+            } else if (crimes[0].equals("empty"))
             {
                 offCampusButton.setText("No Off-Campus Crimes reported for " + dateFromSearch);
                 offMessage.setClickable(true);
@@ -121,6 +155,7 @@ public class MyActivity extends AppCompatActivity{
             else {
                 if (i == 0)
                 {
+                    offMessage.setHeight(0);
                     offCampusButton.setText("Off-Campus Crimes for " + dateFromSearch);
                     TableRow row = new TableRow(this);
                     // Create new row
@@ -153,65 +188,81 @@ public class MyActivity extends AppCompatActivity{
                     row.addView(descriptionHeader);
                     // Add Description Header to header table
 
-                    offCampusHeaderTable.addView(row);
+                    offCampusTable.addView(row);
                 }
-                TableRow row = new TableRow(this);
-                // Create new row
 
-                TextView reportNum = new TextView(this);
-                reportNum.setHeight(50);
-                reportNum.setMaxWidth(45);
-                info = crimes[i];
+                if ((i < crimes.length)
+                        && ((i + 1) < crimes.length)
+                        && ((i + 4) < crimes.length)
+                        && j < links.length) {
+                    TableRow row = new TableRow(this);
+                    // Create new row
 
-                if (info != null && info.contains("null")) {
-                    info = info.replaceAll("null", "");
+                    TextView reportNum = new TextView(this);
+                    reportNum.setHeight(50);
+                    reportNum.setMaxWidth(25);
+                    reportNum.setSingleLine(false);
+                    info = crimes[i];
+
+                    if (info != null && info.contains("null")) {
+                        info = info.replaceAll("null", "");
+                    }
+                    reportNum.setText(info);
+                    row.addView(reportNum);
+                    // Add Report Number to row
+
+                    TextView incidentType = new TextView(this);
+                    incidentType.setHeight(50);
+                    incidentType.setMaxWidth(35);
+                    incidentType.setSingleLine(false);
+                    info = crimes[i + 1];
+
+                    if (info != null && info.contains("null")) {
+                        info = info.replaceAll("null", "");
+                    }
+                    incidentType.setText(info);
+                    row.addView(incidentType);
+                    // Add Incident Type to row
+
+                    TextView location = new TextView(this);
+                    location.setHeight(50);
+                    location.setMaxWidth(35);
+                    location.setSingleLine(false);
+                    info = crimes[i + 4];
+
+                    if (info != null && info.contains("null")) {
+                        info = info.replaceAll("null", "");
+                    }
+                    location.setText(info);
+                    row.addView(location);
+                    // Add location to row
+
+                    TextView description = new TextView(this);
+                    description.setHeight(50);
+                    description.setMaxWidth(35);
+                    description.setSingleLine(false);
+                    description.setClickable(true);
+                    description.setMovementMethod(LinkMovementMethod.getInstance());
+                    info = links[j];
+                    j++;
+
+                    description.setText(Html.fromHtml(crimeLink.replaceAll("placeholder", "http://www.columbuspolice.org/reports/PublicReport?caseID=" + info)));
+                    row.addView(description);
+                    // Add location to row
+                    offCampusTable.addView(row);
                 }
-                reportNum.setText(info);
-                row.addView(reportNum);
-                // Add Report Number to row
-
-                TextView incidentType = new TextView(this);
-                incidentType.setHeight(50);
-                incidentType.setMaxWidth(40);
-                info = crimes[i + 1];
-
-                if (info != null && info.contains("null")) {
-                    info = info.replaceAll("null", "");
+                else
+                {
+                    i = crimes.length;
                 }
-                incidentType.setText(info);
-                row.addView(incidentType);
-                // Add Incident Type to row
-
-                TextView location = new TextView(this);
-                location.setHeight(50);
-                location.setMaxWidth(40);
-                info = crimes[i + 4];
-
-                if (info != null && info.contains("null")) {
-                    info = info.replaceAll("null", "");
-                }
-                location.setText(info);
-                row.addView(location);
-                // Add location to row
-
-                TextView description = new TextView(this);
-                description.setHeight(50);
-                description.setMaxWidth(40);
-                description.setClickable(true);
-                description.setMovementMethod(LinkMovementMethod.getInstance());
-                info = links[j];
-                j++;
-
-                description.setText(Html.fromHtml(crimeLink.replaceAll("placeholder", "http://www.columbuspolice.org/reports/PublicReport?caseID=" + info)));
-                row.addView(description);
-                // Add location to row
-
-                offCampusTable.addView(row);
             }
         }
     }
 
     public void onCampus(String[] crimes, String dateFromSearch) {
+        date = dateFromSearch;
+        // Update date
+
         System.arraycopy(crimes, 0, onCampusCrimes, 0, crimes.length);
         // Updated onCampusCrimes array
 
@@ -225,122 +276,135 @@ public class MyActivity extends AppCompatActivity{
         String info = "";
         // Access off-campus table and create variables
 
-        for (int i = 0; i < crimes.length; i += 8) {
-            if (crimes[i] == null)
-            {
-                i = crimes.length;
-            }
-            else if (crimes[0].equals("down"))
-            {
-                onCampusButton.setText("Website down");
-                onMessage.setClickable(true);
-                onMessage.setMovementMethod(LinkMovementMethod.getInstance());
-                onMessage.setText(Html.fromHtml("The OSU Police Department's website is currently down.\n" +
-                        "Please be sure to check the <a href='http://www.ps.ohio-state.edu/police/daily_log/'>OSU web portal</a>" +
-                        " later today or tomorrow for any updates."));
-                i = crimes.length;
-            }
-            else if (crimes[0].equals("empty"))
-            {
-                onCampusButton.setText("No On-Campus Crimes reported for " + dateFromSearch);
-                onMessage.setClickable(true);
-                onMessage.setMovementMethod(LinkMovementMethod.getInstance());
-                onMessage.setText(Html.fromHtml("This is due to either:<br> &#8226; The Ohio State Police Department forgetting " +
-                        "to upload crime information<br> &#8226; Attempting to retrieve crime information before " +
-                        "it has been uploaded<br> &#8226; No crimes have occurred on this day<br><br> Please be sure to " +
-                        "check the <a href='http://www.ps.ohio-state.edu/police/daily_log/'>OSU " +
-                        "web portal</a> later today or tomorrow for any updates."));
-                i = crimes.length;
-            }
-            else {
-                if (i == 0)
-                {
-                    onCampusButton.setText("On-Campus Crimes for " + dateFromSearch);
-                    TableRow row = new TableRow(this);
-                    // Create new row
 
-                    TextView reportNumHeader = new TextView(this);
-                    reportNumHeader.setText("Report Number");
-                    reportNumHeader.setGravity(Gravity.LEFT);
-                    reportNumHeader.setTypeface(null, Typeface.BOLD);
-                    row.addView(reportNumHeader);
-                    // Add Report Number Header to header table
-
-                    TextView IncidentTypeHeader = new TextView(this);
-                    IncidentTypeHeader.setText("Incident Type");
-                    IncidentTypeHeader.setGravity(Gravity.LEFT);
-                    IncidentTypeHeader.setTypeface(null, Typeface.BOLD);
-                    row.addView(IncidentTypeHeader);
-                    // Add Incident Type Header to header table
-
-                    TextView locationHeader = new TextView(this);
-                    locationHeader.setText("Location");
-                    locationHeader.setGravity(Gravity.LEFT);
-                    locationHeader.setTypeface(null, Typeface.BOLD);
-                    row.addView(locationHeader);
-                    // Add Location Header to header table
-
-                    TextView descriptionHeader = new TextView(this);
-                    descriptionHeader.setText("Description");
-                    descriptionHeader.setGravity(Gravity.LEFT);
-                    descriptionHeader.setTypeface(null, Typeface.BOLD);
-                    row.addView(descriptionHeader);
-                    // Add Description Header to header table
-
-                    onCampusHeaderTable.addView(row);
+        if (crimes[0].equals("empty"))
+        {
+            onCampusButton.setText("No On-Campus Crimes reported for " + dateFromSearch);
+            onMessage.setClickable(true);
+            onMessage.setMovementMethod(LinkMovementMethod.getInstance());
+            onMessage.setText(Html.fromHtml("This is due to either:<br> &#8226; The Ohio State Police Department forgetting " +
+                    "to upload crime information<br> &#8226; Attempting to retrieve crime information before " +
+                    "it has been uploaded<br> &#8226; No crimes have occurred on this day<br><br> Please be sure to " +
+                    "check the <a href='http://www.ps.ohio-state.edu/police/daily_log/'>OSU " +
+                    "web portal</a> later today or tomorrow for any updates."));
+        }
+        else if (crimes[0].equals("down")) {
+            onCampusButton.setText("Website down/not loading");
+            onMessage.setClickable(true);
+            onMessage.setMovementMethod(LinkMovementMethod.getInstance());
+            onMessage.setText(Html.fromHtml("The OSU Police Department's website is currently unreachable.<br><br>" +
+                    "Please be sure to check the <a href='http://www.ps.ohio-state.edu/police/daily_log/'>OSU web portal</a>" +
+                    " later today or tomorrow for any updates."));
+        }
+        else {
+            for (int i = 0; i < crimes.length; i += 8) {
+                if ((crimes[i] == null) || (crimes[i].equals("null"))) {
+                    i = crimes.length;
                 }
-                TableRow row = new TableRow(this);
-                // Create new row
+                else {
+                    if (i == 0) {
+                        onMessage.setHeight(0);
+                        onCampusButton.setText("On-Campus Crimes for " + dateFromSearch);
+                        TableRow row = new TableRow(this);
+                        // Create new row
 
-                TextView reportNum = new TextView(this);
-                reportNum.setHeight(50);
-                reportNum.setMaxWidth(45);
-                info = crimes[i];
+                        TextView reportNumHeader = new TextView(this);
+                        reportNumHeader.setText("Report Number");
+                        reportNumHeader.setGravity(Gravity.LEFT);
+                        reportNumHeader.setTypeface(null, Typeface.BOLD);
+                        row.addView(reportNumHeader);
+                        // Add Report Number Header to header table
 
-                if (info != null && info.contains("null")) {
-                    info = info.replaceAll("null", "");
+                        TextView IncidentTypeHeader = new TextView(this);
+                        IncidentTypeHeader.setText("Incident Type");
+                        IncidentTypeHeader.setGravity(Gravity.LEFT);
+                        IncidentTypeHeader.setTypeface(null, Typeface.BOLD);
+                        row.addView(IncidentTypeHeader);
+                        // Add Incident Type Header to header table
+
+                        TextView locationHeader = new TextView(this);
+                        locationHeader.setText("Location");
+                        locationHeader.setGravity(Gravity.LEFT);
+                        locationHeader.setTypeface(null, Typeface.BOLD);
+                        row.addView(locationHeader);
+                        // Add Location Header to header table
+
+                        TextView descriptionHeader = new TextView(this);
+                        descriptionHeader.setText("Description");
+                        descriptionHeader.setGravity(Gravity.LEFT);
+                        descriptionHeader.setTypeface(null, Typeface.BOLD);
+                        row.addView(descriptionHeader);
+                        // Add Description Header to header table
+
+                        onCampusTable.addView(row);
+                    }
+
+
+                    if ((i < crimes.length)
+                            && ((i + 5) < crimes.length)
+                            && ((i + 6) < crimes.length)
+                            && ((i + 7) < crimes.length)) {
+                        TableRow row = new TableRow(this);
+                        // Create new row
+
+                        TextView reportNum = new TextView(this);
+                        reportNum.setHeight(50);
+                        reportNum.setMaxWidth(45);
+                        reportNum.setSingleLine(false);
+                        info = crimes[i];
+
+
+                        if (info != null && info.contains("null")) {
+                            info = info.replaceAll("null", "");
+                        }
+                        reportNum.setText(info);
+                        row.addView(reportNum);
+                        // Add Report Number to row
+
+                        TextView incidentType = new TextView(this);
+                        incidentType.setHeight(50);
+                        incidentType.setMaxWidth(40);
+                        incidentType.setSingleLine(false);
+                        info = crimes[i + 5];
+
+                        if (info != null && info.contains("null")) {
+                            info = info.replaceAll("null", "");
+                        }
+                        incidentType.setText(info);
+                        row.addView(incidentType);
+                        // Add Incident Type to row
+
+                        TextView location = new TextView(this);
+                        location.setHeight(50);
+                        location.setMaxWidth(40);
+                        location.setSingleLine(false);
+                        info = crimes[i + 6];
+
+                        if (info != null && info.contains("null")) {
+                            info = info.replaceAll("null", "");
+                        }
+                        location.setText(info);
+                        row.addView(location);
+                        // Add location to row
+
+                        TextView description = new TextView(this);
+                        description.setHeight(50);
+                        description.setMaxWidth(40);
+                        description.setSingleLine(false);
+                        info = crimes[i + 7];
+
+                        if (info != null && info.contains("null")) {
+                            info = info.replaceAll("null", "");
+                        }
+                        description.setText(info);
+                        row.addView(description);
+                        // Add location to row
+
+                        onCampusTable.addView(row);
+                    } else {
+                        i = crimes.length;
+                    }
                 }
-                reportNum.setText(info);
-                row.addView(reportNum);
-                // Add Report Number to row
-
-                TextView incidentType = new TextView(this);
-                incidentType.setHeight(50);
-                incidentType.setMaxWidth(40);
-                info = crimes[i + 5];
-
-                if (info != null && info.contains("null")) {
-                    info = info.replaceAll("null", "");
-                }
-                incidentType.setText(info);
-                row.addView(incidentType);
-                // Add Incident Type to row
-
-                TextView location = new TextView(this);
-                location.setHeight(50);
-                location.setMaxWidth(40);
-                info = crimes[i + 6];
-
-                if (info != null && info.contains("null")) {
-                    info = info.replaceAll("null", "");
-                }
-                location.setText(info);
-                row.addView(location);
-                // Add location to row
-
-                TextView description = new TextView(this);
-                description.setHeight(50);
-                description.setMaxWidth(40);
-                info = crimes[i + 7];
-
-                if (info != null && info.contains("null")) {
-                    info = info.replaceAll("null", "");
-                }
-                description.setText(info);
-                row.addView(description);
-                // Add location to row
-
-                onCampusTable.addView(row);
             }
         }
     }
@@ -387,24 +451,66 @@ public class MyActivity extends AppCompatActivity{
 
     private void addMapFragment(double[] locations, String[] crimeInfo) {
 
-        manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction().addToBackStack(null);
-        MapFragment fragment = new MapFragment();
-        transaction.add(R.id.mapView, fragment);
+        SharedPreferences settings = getSharedPreferences("crimeInfo", 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.clear();
 
+        StringBuilder data = new StringBuilder();
+        for (int i = 0; i < offCampusCrimes.length; i++) {
+            data.append(offCampusCrimes[i]).append("#");
+        }
+        editor.putString("off", data.toString());
+
+        data = new StringBuilder();
+        for (int i = 0; i < onCampusCrimes.length; i++) {
+            data.append(onCampusCrimes[i]).append("#");
+        }
+        editor.putString("on", data.toString());
+
+        data = new StringBuilder();
+        if (offCampusCrimeLinks != null) {
+            for (int i = 0; i < offCampusCrimeLinks.length; i++) {
+                data.append(offCampusCrimeLinks[i]).append("#");
+            }
+            editor.putString("links", data.toString());
+        }
+        else
+        {
+            editor.putString("links", "");
+        }
+
+        editor.putString("date", date);
+
+
+        editor.apply();
+
+        manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        MapFragment fragment = new MapFragment();
+        transaction.replace(R.id.mapView, fragment, "map");
+        transaction.addToBackStack("map");
         Bundle args = new Bundle();
         args.putDoubleArray("locations", locations);
         args.putStringArray("info", crimeInfo);
+
+        args.putStringArray("off", offCampusCrimes);
+        args.putStringArray("on", onCampusCrimes);
+        args.putString("date", date);
+        args.putStringArray("links", offCampusCrimeLinks);
+
         fragment.setArguments(args);
         // Pass location array to map fragment
         transaction.commit();
+
+        getSupportFragmentManager().executePendingTransactions();
     }
 
     @Override
     public void onBackPressed() {
-        //finish();
-        startActivity(new Intent(this,SplashScreen.class));
-        this.finish();
+        Intent openMainActivity= new Intent(getApplicationContext(), MyActivity.class);
+        openMainActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(openMainActivity);
+        // Restart main, pass information crime info to it
     }
 
     /*
@@ -570,6 +676,35 @@ public class MyActivity extends AppCompatActivity{
             j += 2;
         }
         return result;
+    }
+
+    private static Intent getIntent(Context context, Class<?> cls) {
+        Intent intent = new Intent(context, cls);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        return intent;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putStringArray("off", offCampusCrimes);
+        outState.putStringArray("on", onCampusCrimes);
+        outState.putStringArray("links", offCampusCrimeLinks);
+        outState.putString("date", date);
+
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        active = true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        active = false;
     }
 }
 

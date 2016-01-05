@@ -1,8 +1,6 @@
 package com.example.cailin.awareosu;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,7 +13,6 @@ import org.jsoup.select.Elements;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Cailin on 12/31/2015.
@@ -145,10 +142,6 @@ public class SplashScreen extends Activity {
             // close this activity
             finish();
             return null;
-        }
-
-        protected void onPostExecute(Void... arg0) {
-
         }
 
         protected String getYesterdaysDate(Void... arg0) {

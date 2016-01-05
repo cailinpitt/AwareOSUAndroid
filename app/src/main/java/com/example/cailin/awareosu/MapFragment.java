@@ -1,6 +1,5 @@
 package com.example.cailin.awareosu;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -25,6 +24,10 @@ public class MapFragment extends Fragment {
     private GoogleMap googleMap;
     public double[] locations;
     public String[] crimeInfo;
+    public String[] offCampusCrimes;
+    public String[] onCampusCrimes;
+    public String[] offCampusCrimeLinks;
+    public String date;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -33,6 +36,9 @@ public class MapFragment extends Fragment {
         Bundle args = getArguments();
         locations = args.getDoubleArray("locations");
         crimeInfo = args.getStringArray("info");
+        offCampusCrimes = args.getStringArray("off");
+        onCampusCrimes = args.getStringArray("on");
+        offCampusCrimeLinks = args.getStringArray("links");
         // Retrieve locations from main activity
 
         double latitude = 40.006329;
@@ -121,5 +127,19 @@ public class MapFragment extends Fragment {
         mMapView.onLowMemory();
     }
 
+    public String[] getOffCampusCrimes() {
+        return offCampusCrimes;
+    }
 
+    public String[] getOnCampusCrimes() {
+        return onCampusCrimes;
+    }
+
+    public String[] getCrimeLinks() {
+        return offCampusCrimeLinks;
+    }
+
+    public String getDate() {
+        return date;
+    }
 }

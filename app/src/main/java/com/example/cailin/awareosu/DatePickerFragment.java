@@ -3,17 +3,17 @@ package com.example.cailin.awareosu;
 /**
  * Created by Cailin on 12/31/2015.
  */
+
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.widget.DatePicker;
-import android.app.Dialog;
 
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
