@@ -55,11 +55,14 @@ public class MyActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        String notificationPreference = SP.getString("getNotification", "1");
-        if (notificationPreference.equals("1")) {
+        SharedPreferences SP = getSharedPreferences("firstRun", 0);
+
+        if (SP.getBoolean("my_first_time", true)) {
             notifyUser();
-            // User has selected the option to be notified of crimes
+            // App is being run for the first time, initially turn notifications on
+
+            SP.edit().putBoolean("my_first_time", false).apply();
+            // Record that app has been run for the first time
         }
         // We want user to always be notified of crimes until they selected "no notifications"
         // in settings page
@@ -531,11 +534,7 @@ public class MyActivity extends AppCompatActivity{
             SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
             String notificationPreference = SP.getString("getNotification", "1");
 
-            if (notificationPreference.equals("1")) {
-                notifyUser();
-                // User has selected the option to be notified of crimes
-            }
-            else
+            if (!notificationPreference.equals("1"))
             {
                 NotificationManager mNotificationManager =
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -545,6 +544,10 @@ public class MyActivity extends AppCompatActivity{
 
                 // Cancels notification.
                 mNotificationManager.cancel(mNotificationId);
+            }
+            else {
+                notifyUser();
+                // User has selected the option to be notified of crimes
             }
             return true;
         }
