@@ -40,10 +40,15 @@ public class MyActivity extends AppCompatActivity{
     public String[] offCampusCrimes;
     public String[] onCampusCrimes;
     public String[] offCampusCrimeLinks;
+    public int offCrimeNum;
+    public int onCrimeNum;
     public FragmentManager manager;
     public String date;
     private Geocoder coder;
     static boolean active = false;
+
+    // Sets an ID for the notification
+    public int mNotificationId = 001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,30 +72,37 @@ public class MyActivity extends AppCompatActivity{
         SharedPreferences settings = getSharedPreferences("crimeInfo", 0);
         String temp = settings.getString("off", null);
 
-        SharedPreferences.Editor editor = settings.edit();
-
         if (temp != null) {
-            offCampusCrimes = temp.split("#");
+            SharedPreferences.Editor editor = settings.edit();
+
+            offCampusCrimes = temp.split("~");
             editor.remove("off");
 
             temp = settings.getString("on", null);
-            onCampusCrimes = temp.split("#");
+            onCampusCrimes = temp.split("~");
             editor.remove("on");
 
-            temp = settings.getString("links", null).replaceAll("null,", "");
-            if (temp.length() == 0)
+            temp = settings.getString("links", null);
+            if (temp == null)
             {
                 offCampusCrimeLinks = null;
             }
             else {
-                offCampusCrimeLinks = temp.split("#");
-                editor.remove("links");
+                temp = temp.replaceAll("null,", "");
+                offCampusCrimeLinks = temp.split("~");
             }
+            editor.remove("links");
 
             date = settings.getString("date", null);
             editor.remove("date");
 
-            editor.commit();
+            onCrimeNum = settings.getInt("onNum", 0);
+            editor.remove("onNum");
+
+            offCrimeNum = settings.getInt("offNum", 0);
+            editor.remove("offNum");
+
+            editor.apply();
 
             // We just came from map fragment, load previous info and display
         }
@@ -100,6 +112,8 @@ public class MyActivity extends AppCompatActivity{
             offCampusCrimes = i.getStringArrayExtra("off");
             onCampusCrimes = i.getStringArrayExtra("on");
             offCampusCrimeLinks = i.getStringArrayExtra("offLinks");
+            offCrimeNum = i.getIntExtra("offCrimeNum", 0);
+            onCrimeNum = i.getIntExtra("onCrimeNum", 0);
             // Get web scraped info from splash screen
 
             DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
@@ -108,26 +122,37 @@ public class MyActivity extends AppCompatActivity{
             date = dateFormat.format(cal.getTime());
         }
 
-        offCampus(offCampusCrimes, offCampusCrimeLinks, date);
-        onCampus(onCampusCrimes, date);
+        offCampus(offCampusCrimes, offCampusCrimeLinks, date, offCrimeNum);
+        onCampus(onCampusCrimes, date, onCrimeNum);
 
         FragmentManager fm = getSupportFragmentManager();
         fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
-                if(getSupportFragmentManager().getBackStackEntryCount() == 0) finish();
+                if (getSupportFragmentManager().getBackStackEntryCount() == 0) finish();
             }
         });
 
         PreferenceManager.setDefaultValues(this, R.xml.settings, false);
     }
 
-    public void offCampus(String[] crimes, String[] links, String dateFromSearch) {
+    public void offCampus(String[] crimes, String[] links, String dateFromSearch, int crimeNum) {
         date = dateFromSearch;
         // Update date
 
         System.arraycopy(crimes, 0, offCampusCrimes, 0, crimes.length);
         // Updated offCampusCrimes array
+
+        if (links != null) {
+            if (offCampusCrimeLinks == null) {
+                offCampusCrimeLinks = new String[links.length];
+            }
+            System.arraycopy(links, 0, offCampusCrimeLinks, 0, links.length);
+            // Updated offCampusCrimeLinks array
+        }
+
+        offCrimeNum = crimeNum;
+        // Update offCrimeNum
 
         TableLayout offCampusTable = (TableLayout) findViewById(R.id.off_campus);
         offCampusTable.removeAllViews();
@@ -138,13 +163,23 @@ public class MyActivity extends AppCompatActivity{
         Button offCampusButton = (Button) findViewById(R.id.offCampus_button);
         String info = "";
         String crimeLink = "<a href='placeholder'>Report</a>";
+        int length;
+
+        if (crimeNum != 0)
+        {
+            length = crimeNum * 5;
+        }
+        else
+        {
+            length = crimes.length;
+        }
         // Access off-campus table and create variables
 
         int j = 1;
-        for (int i = 0; i < crimes.length; i += 5) {
+        for (int i = 0; i < length; i += 5) {
             if (crimes[i] == null)
             {
-                i = crimes.length;
+                i = length;
             }
             else if (crimes[0].equals("down"))
             {
@@ -155,7 +190,7 @@ public class MyActivity extends AppCompatActivity{
                         "currently unreachable.<br><br>Please be sure to check the " +
                         "<a href='http://www.columbuspolice.org/reports/SearchLocation?loc=zon4'>CPD " +
                         "web portal</a> later today or tomorrow for any updates."));
-                i = crimes.length;
+                i = length;
             } else if (crimes[0].equals("empty"))
             {
                 offCampusButton.setText("No Off-Campus Crimes reported for " + dateFromSearch);
@@ -167,13 +202,13 @@ public class MyActivity extends AppCompatActivity{
                         "it has been uploaded<br> &#8226; No crimes have occurred on this day<br><br> Please be sure to " +
                         "check the <a href='http://www.columbuspolice.org/reports/SearchLocation?loc=zon4'>CPD " +
                         "web portal</a> later today or tomorrow for any updates."));
-                i = crimes.length;
+                i = length;
             }
             else {
                 if (i == 0)
                 {
                     offMessage.setHeight(0);
-                    offCampusButton.setText("Off-Campus Crimes for " + dateFromSearch);
+                    offCampusButton.setText(crimeNum + " Off-Campus Crimes for " + dateFromSearch);
                     TableRow row = new TableRow(this);
                     // Create new row
 
@@ -206,12 +241,14 @@ public class MyActivity extends AppCompatActivity{
                     // Add Description Header to header table
 
                     offCampusTable.addView(row);
+
+                    // Add header
                 }
 
-                if ((i < crimes.length)
-                        && ((i + 1) < crimes.length)
-                        && ((i + 4) < crimes.length)
-                        && j < links.length) {
+                else if ((i < length)
+                        && ((i + 1) < length)
+                        && ((i + 4) < length)
+                        && j < crimeNum) {
                     TableRow row = new TableRow(this);
                     // Create new row
 
@@ -270,18 +307,44 @@ public class MyActivity extends AppCompatActivity{
                 }
                 else
                 {
-                    i = crimes.length;
+                    i = length;
                 }
             }
         }
+
+        if (crimeNum > 29) {
+            String columbusPD = "http://www.columbuspolice.org/reports/Results?from=placeholder&to=placeholder&loc=zon4&types=9";
+            columbusPD = columbusPD.replaceAll("placeholder", date);
+            // Get URL
+
+            TableRow row = new TableRow(this);
+            // Create new row
+
+            TextView overflow = new TextView(this);
+
+            overflow.setHeight(50);
+            overflow.setMaxWidth(35);
+            overflow.setClickable(true);
+            overflow.setMovementMethod(LinkMovementMethod.getInstance());
+            overflow.setText(Html.fromHtml("Only first 29 crimes are shown, " + (crimeNum - 29) +
+                    " are not shown. Click <a href='" + columbusPD + "'>here</a> to view the rest."));
+
+            row.addView(overflow);
+            // Add Incident Type to row
+
+            offCampusTable.addView(row);
+        }
     }
 
-    public void onCampus(String[] crimes, String dateFromSearch) {
+    public void onCampus(String[] crimes, String dateFromSearch, int crimeNum) {
         date = dateFromSearch;
         // Update date
 
         System.arraycopy(crimes, 0, onCampusCrimes, 0, crimes.length);
-        // Updated onCampusCrimes array
+        // Updated offCampusCrimes array
+
+        onCrimeNum = crimeNum;
+        // Update offCrimeNum
 
         TableLayout onCampusTable = (TableLayout) findViewById(R.id.on_campus);
         onCampusTable.removeAllViews();
@@ -321,7 +384,7 @@ public class MyActivity extends AppCompatActivity{
                 else {
                     if (i == 0) {
                         onMessage.setHeight(0);
-                        onCampusButton.setText("On-Campus Crimes for " + dateFromSearch);
+                        onCampusButton.setText(crimeNum + " On-Campus Crimes for " + dateFromSearch);
                         TableRow row = new TableRow(this);
                         // Create new row
 
@@ -447,6 +510,7 @@ public class MyActivity extends AppCompatActivity{
 
             SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
             String notificationPreference = SP.getString("getNotification", "1");
+
             if (notificationPreference.equals("1")) {
                 notifyUser();
                 // User has selected the option to be notified of crimes
@@ -458,9 +522,6 @@ public class MyActivity extends AppCompatActivity{
 
                 // mId allows you to update the notification later on.
                 // mNotificationManager.notify(mId, mBuilder.build());
-
-                // Sets an ID for the notification
-                int mNotificationId = 001;
 
                 // Cancels notification.
                 mNotificationManager.cancel(mNotificationId);
@@ -491,36 +552,54 @@ public class MyActivity extends AppCompatActivity{
 
     private void addMapFragment(double[] locations, String[] crimeInfo) {
 
+        int cr = onCrimeNum;
         SharedPreferences settings = getSharedPreferences("crimeInfo", 0);
         SharedPreferences.Editor editor = settings.edit();
-        editor.clear();
+        //editor.clear();
+        editor.apply();
+        // Clear previous saved crime info
+
+        settings = getSharedPreferences("crimeInfo", 0);
+        editor = settings.edit();
+        // Time to save new info
+
 
         StringBuilder data = new StringBuilder();
         for (int i = 0; i < offCampusCrimes.length; i++) {
-            data.append(offCampusCrimes[i]).append("#");
+            data.append(offCampusCrimes[i]).append("~");
         }
+        editor.remove("off");
         editor.putString("off", data.toString());
 
         data = new StringBuilder();
         for (int i = 0; i < onCampusCrimes.length; i++) {
-            data.append(onCampusCrimes[i]).append("#");
+            data.append(onCampusCrimes[i]).append("~");
         }
+        editor.remove("on");
         editor.putString("on", data.toString());
 
         data = new StringBuilder();
-        if (offCampusCrimeLinks != null) {
+        if (offCampusCrimeLinks.length > 0) {
             for (int i = 0; i < offCampusCrimeLinks.length; i++) {
-                data.append(offCampusCrimeLinks[i]).append("#");
+                data.append(offCampusCrimeLinks[i]).append("~");
             }
+            editor.remove("links");
             editor.putString("links", data.toString());
         }
         else
         {
-            editor.putString("links", "");
+            editor.remove("links");
+            editor.putString("links", null);
         }
 
+        editor.remove("date");
         editor.putString("date", date);
 
+        editor.remove("onNum");
+        editor.putInt("onNum", onCrimeNum);
+
+        editor.remove("offNum");
+        editor.putInt("offNum", offCrimeNum);
 
         editor.apply();
 
@@ -537,6 +616,8 @@ public class MyActivity extends AppCompatActivity{
         args.putStringArray("on", onCampusCrimes);
         args.putString("date", date);
         args.putStringArray("links", offCampusCrimeLinks);
+        args.putInt("onNum", onCrimeNum);
+        args.putInt("offNum", offCrimeNum);
 
         fragment.setArguments(args);
         // Pass location array to map fragment
@@ -733,4 +814,3 @@ public class MyActivity extends AppCompatActivity{
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), PendingIntent.getBroadcast(this, 1, intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT));
     }
 }
-

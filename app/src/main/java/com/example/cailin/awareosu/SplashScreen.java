@@ -41,6 +41,7 @@ public class SplashScreen extends Activity {
      */
     public class RetrieveCrimes extends AsyncTask<Void, Void, String[]> {
 
+
         @Override
         protected String[] doInBackground(Void... arg0) {
         /* Get yesterday's crimes */
@@ -53,17 +54,41 @@ public class SplashScreen extends Activity {
             String OSUPD = "http://www.ps.ohio-state.edu/police/daily_log/view.php?date=yesterday";
             Document doc = null;
             boolean websiteDown = false;
+            int numberOfOnCrimes = 0;
+            int numberOfOffCrimes = 0;
             // Create variables
 
-            try {
-                String userAgent = System.getProperty("http.agent");
-                doc = Jsoup.connect(columbusPD.replaceAll("placeholder", date)).timeout(20*1000).userAgent(userAgent).get();
-                // Try to visit Columbus PD's website
-            }
-            catch(java.io.IOException ex){
-                offCampusCrimes[0] = "down";
-                websiteDown = true;
-                // Website is down, handle case
+            int retries = 0;
+            while (retries < 3) {
+                try {
+                    try
+                    {
+                        Thread.sleep(1000);
+                    }
+                    catch(InterruptedException ex)
+                    {
+                        Thread.currentThread().interrupt();
+                    }
+                    // Sleep for one second before trying
+
+                    String userAgent = System.getProperty("http.agent");
+                    doc = Jsoup.connect(columbusPD.replaceAll("placeholder", date)).timeout(20 * 1000).userAgent(userAgent).get();
+                    websiteDown = false;
+                    // Try to visit Columbus PD's website
+                } catch (java.io.IOException ex) {
+                    offCampusCrimes[0] = "down";
+
+                    websiteDown = true;
+                    // Website is down, handle case
+                }
+                if (websiteDown)
+                {
+                    retries++;
+                }
+                else
+                {
+                    retries = 3;
+                }
             }
 
             if (!websiteDown) {
@@ -71,17 +96,33 @@ public class SplashScreen extends Activity {
                 // HTML table holding yesterday's crimes
 
                 if (crimeTable != null) {
+                    String crimeNumSentence = doc.getElementById("MainContent_lblCount").text();
+                    int space = crimeNumSentence.indexOf(" ");
+                    numberOfOffCrimes = Integer.parseInt(crimeNumSentence.substring(0, space));
+                    //Retrieve number of crimes for this day
+
                     Elements crimeInfo = crimeTable.getElementsByTag("td");
                     Elements trElements = crimeTable.getElementsByTag("tr");
                     // Get individual crime information
 
                     int counter = 0;
+                    int limit;
+
+                    if (numberOfOffCrimes > 29)
+                    {
+                        limit = 30;
+                    }
+                    else
+                    {
+                        limit = numberOfOffCrimes + 1;
+                    }
+
                     offCampusCrimeLinks = new String[trElements.size()];
                     for (Element crime : trElements) {
-                        if (counter != 0) {
+                        if ((counter != 0) && (counter < limit)) {
                             int indexOfParenthesis = crime.attr("onclick").indexOf(")");
                             String reportNum = crime.attr("onclick").substring(11, indexOfParenthesis);
-                            offCampusCrimeLinks[counter] = reportNum;
+                            offCampusCrimeLinks[counter - 1] = reportNum;
                             // Get links to each individual crime report
                         }
                         counter++;
@@ -89,10 +130,12 @@ public class SplashScreen extends Activity {
 
                     counter = 0;
                     for (Element info : crimeInfo) {
-                        String linkText = info.text();
-                        offCampusCrimes[counter] += linkText;
-                        counter++;
-                        // Retrieve individual crime info
+                        if (counter < (limit * 5) - 5) {
+                            String linkText = info.text();
+                            offCampusCrimes[counter] += linkText;
+                            counter++;
+                            // Retrieve individual crime info
+                        }
                     }
                 }
                 else
@@ -117,6 +160,8 @@ public class SplashScreen extends Activity {
             if (!websiteDown) {
                 Elements crimeTable = doc.select("td.log");
                 // HTML table holding yesterday's crimes
+                numberOfOnCrimes = crimeTable.size() / 8;
+                // Get number of on campus crimes
 
                 if (crimeTable.size() > 0) {
                     int counter = 0;
@@ -137,6 +182,8 @@ public class SplashScreen extends Activity {
             i.putExtra("off", offCampusCrimes);
             i.putExtra("on", onCampusCrimes);
             i.putExtra("offLinks", offCampusCrimeLinks);
+            i.putExtra("offCrimeNum", numberOfOffCrimes);
+            i.putExtra("onCrimeNum", numberOfOnCrimes);
             startActivity(i);
 
             // close this activity

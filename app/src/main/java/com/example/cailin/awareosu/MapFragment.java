@@ -27,6 +27,8 @@ public class MapFragment extends Fragment {
     public String[] offCampusCrimes;
     public String[] onCampusCrimes;
     public String[] offCampusCrimeLinks;
+    public int offCrimeNum;
+    public int onCrimeNum;
     public String date;
 
     @Override
@@ -39,6 +41,8 @@ public class MapFragment extends Fragment {
         offCampusCrimes = args.getStringArray("off");
         onCampusCrimes = args.getStringArray("on");
         offCampusCrimeLinks = args.getStringArray("links");
+        onCrimeNum = args.getInt("onNum");
+        offCrimeNum = args.getInt("offNum");
         // Retrieve locations from main activity
 
         double latitude = 40.006329;
@@ -125,21 +129,5 @@ public class MapFragment extends Fragment {
     public void onLowMemory() {
         super.onLowMemory();
         mMapView.onLowMemory();
-    }
-
-    public String[] getOffCampusCrimes() {
-        return offCampusCrimes;
-    }
-
-    public String[] getOnCampusCrimes() {
-        return onCampusCrimes;
-    }
-
-    public String[] getCrimeLinks() {
-        return offCampusCrimeLinks;
-    }
-
-    public String getDate() {
-        return date;
     }
 }

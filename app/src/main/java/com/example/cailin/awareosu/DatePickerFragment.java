@@ -35,6 +35,8 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
     public int selectedMonth;
     public int selectedDay;
     public int selectedYear;
+    int numberOfOnCrimes = 0;
+    int numberOfOffCrimes = 0;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
@@ -71,8 +73,8 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         }
         // We now have crime information
 
-        ((MyActivity) getActivity()).offCampus(offCampusCrimes, offCampusCrimeLinks, date);
-        ((MyActivity) getActivity()).onCampus(onCampusCrimes, date);
+        ((MyActivity) getActivity()).offCampus(offCampusCrimes, offCampusCrimeLinks, date, numberOfOffCrimes);
+        ((MyActivity) getActivity()).onCampus(onCampusCrimes, date, numberOfOnCrimes);
         // Load layout tables with information
     }
 
@@ -98,21 +100,42 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
             offCampusCrimes = new String[500];
             onCampusCrimes = new String[500];
             String columbusPD = "http://www.columbuspolice.org/reports/Results?from=placeholder&to=placeholder&loc=zon4&types=9";
-            String OSUPD = "http://www.ps.ohio-state.edu/police/daily_log/view.php?date=yesterday";
+            String OSUPD = "http://www.ps.ohio-state.edu/police/daily_log/view.php";
             Document doc = null;
             boolean websiteDown = false;
             // Create variables
 
-            try {
-                String userAgent = System.getProperty("http.agent");
-                doc = Jsoup.connect(columbusPD.replaceAll("placeholder", date)).timeout(10*1000).userAgent(userAgent).get();
-                // Try to visit Columbus PD's website
-            }
-            catch(java.io.IOException ex){
-                offCampusCrimes[0] = "down";
+            int retries = 0;
+            while (retries < 3) {
+                try {
+                    try
+                    {
+                        Thread.sleep(1000);
+                    }
+                    catch(InterruptedException ex)
+                    {
+                        Thread.currentThread().interrupt();
+                    }
+                    // Sleep for one second before trying
 
-                websiteDown = true;
-                // Website is down, handle case
+                    String userAgent = System.getProperty("http.agent");
+                    doc = Jsoup.connect(columbusPD.replaceAll("placeholder", date)).timeout(20 * 1000).userAgent(userAgent).get();
+                    websiteDown = false;
+                    // Try to visit Columbus PD's website
+                } catch (java.io.IOException ex) {
+                    offCampusCrimes[0] = "down";
+
+                    websiteDown = true;
+                    // Website is down, handle case
+                }
+                if (websiteDown)
+                {
+                    retries++;
+                }
+                else
+                {
+                    retries = 3;
+                }
             }
 
             if (!websiteDown) {
@@ -120,17 +143,32 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
                 // HTML table holding yesterday's crimes
 
                 if (crimeTable != null) {
+                    String crimeNumSentence = doc.getElementById("MainContent_lblCount").text();
+                    int space = crimeNumSentence.indexOf(" ");
+                    numberOfOffCrimes = Integer.parseInt(crimeNumSentence.substring(0, space));
+                    //Retrieve number of crimes for this day
+
                     Elements crimeInfo = crimeTable.getElementsByTag("td");
                     Elements trElements = crimeTable.getElementsByTag("tr");
                     // Get individual crime information
 
                     int counter = 0;
+                    int limit;
+
+                    if (numberOfOffCrimes > 29)
+                    {
+                        limit = 30;
+                    }
+                    else
+                    {
+                        limit = numberOfOffCrimes + 1;
+                    }
                     offCampusCrimeLinks = new String[trElements.size()];
                     for (Element crime : trElements) {
-                        if (counter != 0) {
+                        if ((counter != 0) && (counter < limit)) {
                             int indexOfParenthesis = crime.attr("onclick").indexOf(")");
                             String reportNum = crime.attr("onclick").substring(11, indexOfParenthesis);
-                            offCampusCrimeLinks[counter] = reportNum;
+                            offCampusCrimeLinks[counter - 1] = reportNum;
                             // Get links to each individual crime report
                         }
                         counter++;
@@ -138,10 +176,12 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
 
                     counter = 0;
                     for (Element info : crimeInfo) {
-                        String linkText = info.text();
-                        offCampusCrimes[counter] += linkText;
-                        counter++;
-                        // Retrieve individual crime info
+                        if (counter < (limit * 5) - 5) {
+                            String linkText = info.text();
+                            offCampusCrimes[counter] += linkText;
+                            counter++;
+                            // Retrieve individual crime info
+                        }
                     }
                 }
                 else
@@ -154,7 +194,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
 
             try {
                 String userAgent = System.getProperty("http.agent");
-                doc = Jsoup.connect("http://www.ps.ohio-state.edu/police/daily_log/view.php")
+                doc = Jsoup.connect(OSUPD)
                         .timeout(10 * 1000)
                         .userAgent(userAgent)
                         .data("phrase", "")
@@ -182,6 +222,8 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
             if (!websiteDown) {
                 Elements crimeTable = doc.select("td.log");
                 // HTML table holding yesterday's crimes
+                numberOfOnCrimes = crimeTable.size() / 8;
+                // Get number of on campus crimes
 
                 if (crimeTable.size() == 0)
                 {
