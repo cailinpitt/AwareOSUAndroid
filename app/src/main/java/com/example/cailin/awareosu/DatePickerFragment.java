@@ -12,6 +12,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Window;
 import android.widget.DatePicker;
 
 import org.jsoup.Jsoup;
@@ -40,6 +41,9 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+
         //Use the current date as the default date in the date picker
         final Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);
@@ -81,17 +85,8 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
     /**
      * Class to handle web scraping.
      */
-    public class RetrieveCrimes extends AsyncTask<Void, Void, String[]> {
-        private final Context RetrieveCrimes = null;
+    public class RetrieveCrimes extends AsyncTask<Void, Integer, String[]> {
 
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            ProgressDialog pd = new ProgressDialog(RetrieveCrimes);
-            pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            pd.setMessage("Working...");
-            pd.setIndeterminate(true);
-            pd.setCancelable(false);
-        }
 
         @Override
         protected String[] doInBackground(Void... arg0) {
@@ -191,7 +186,6 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
             }
 
             websiteDown = false;
-
             try {
                 String userAgent = System.getProperty("http.agent");
                 doc = Jsoup.connect(OSUPD)
@@ -240,10 +234,8 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
                     }
                 }
             }
-            return null;
-        }
 
-        protected void onPostExecute(Void... arg0) {
+            return null;
         }
 
         protected String getYesterdaysDate(Void... arg0) {

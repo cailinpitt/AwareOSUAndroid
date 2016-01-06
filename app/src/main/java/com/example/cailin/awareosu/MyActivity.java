@@ -71,11 +71,13 @@ public class MyActivity extends AppCompatActivity{
 
 
         SharedPreferences settings = getSharedPreferences("crimeInfo", 0);
-        String temp = settings.getString("off", null);
+        boolean isCriticalSection = settings.getBoolean("criticalSection", true);
 
-        if (temp != null) {
+        if (!isCriticalSection) {
             SharedPreferences.Editor editor = settings.edit();
+            editor.remove("criticalSection");
 
+            String temp = settings.getString("off", null);
             offCampusCrimes = temp.split("~");
             editor.remove("off");
 
@@ -89,7 +91,7 @@ public class MyActivity extends AppCompatActivity{
                 offCampusCrimeLinks = null;
             }
             else {
-                temp = temp.replaceAll("null,", "");
+                temp = temp.replaceAll("null~", "");
                 offCampusCrimeLinks = temp.split("~");
             }
             editor.remove("links");
@@ -258,7 +260,13 @@ public class MyActivity extends AppCompatActivity{
                 else if ((i < length)
                         && ((i + 1) < length)
                         && ((i + 4) < length)
-                        && j < crimeNum) {
+                        && (j < crimeNum)
+                        && (offCampusCrimes[i] != null)
+                        && (offCampusCrimes[i + 1] != null)
+                        && (offCampusCrimes[i + 4] != null)
+                        && (!offCampusCrimes[i].equals("null"))
+                        && (!offCampusCrimes[i + 1].equals("null"))
+                        && (!offCampusCrimes[i + 4].equals("null"))) {
 
                     info = crimes[i];
 
@@ -555,7 +563,11 @@ public class MyActivity extends AppCompatActivity{
             // Get array containing lat + long of crimes, needed for map
 
             setContentView(R.layout.activity_map_fragment);
+
+            // Critical section begins
             addMapFragment(latLong, crimeInfo);
+
+            // Critical section ends when back button is pressed
             return true;
         }
 
@@ -563,18 +575,8 @@ public class MyActivity extends AppCompatActivity{
     }
 
     private void addMapFragment(double[] locations, String[] crimeInfo) {
-
-        int cr = onCrimeNum;
         SharedPreferences settings = getSharedPreferences("crimeInfo", 0);
         SharedPreferences.Editor editor = settings.edit();
-        //editor.clear();
-        editor.apply();
-        // Clear previous saved crime info
-
-        settings = getSharedPreferences("crimeInfo", 0);
-        editor = settings.edit();
-        // Time to save new info
-
 
         StringBuilder data = new StringBuilder();
         for (int i = 0; i < offCampusCrimes.length; i++) {
@@ -613,6 +615,9 @@ public class MyActivity extends AppCompatActivity{
         editor.remove("offNum");
         editor.putInt("offNum", offCrimeNum);
 
+        editor.remove("criticalSection");
+        editor.putBoolean("criticalSection", true);
+
         editor.apply();
 
         manager = getSupportFragmentManager();
@@ -640,7 +645,15 @@ public class MyActivity extends AppCompatActivity{
 
     @Override
     public void onBackPressed() {
-        Intent openMainActivity= new Intent(getApplicationContext(), MyActivity.class);
+        SharedPreferences settings = getSharedPreferences("crimeInfo", 0);
+        SharedPreferences.Editor editor = settings.edit();
+
+        editor.remove("criticalSection");
+        editor.putBoolean("criticalSection", false);
+        editor.apply();
+        // Critical section is over
+
+        Intent openMainActivity = new Intent(getApplicationContext(), MyActivity.class);
         openMainActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(openMainActivity);
         // Restart main, pass information crime info to it

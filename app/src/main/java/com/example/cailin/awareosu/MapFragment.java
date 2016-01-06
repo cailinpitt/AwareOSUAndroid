@@ -1,5 +1,6 @@
 package com.example.cailin.awareosu;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -116,13 +117,6 @@ public class MapFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mMapView.onPause();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        mMapView.onDestroy();
     }
 
     @Override
