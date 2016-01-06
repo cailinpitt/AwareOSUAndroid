@@ -20,6 +20,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -143,10 +144,13 @@ public class MyActivity extends AppCompatActivity{
         System.arraycopy(crimes, 0, offCampusCrimes, 0, crimes.length);
         // Updated offCampusCrimes array
 
-        if (links != null) {
-            if (offCampusCrimeLinks == null) {
-                offCampusCrimeLinks = new String[links.length];
-            }
+        if (links == null)
+        {
+            offCampusCrimeLinks = null;
+        }
+        else
+        {
+            offCampusCrimeLinks = new String[links.length];
             System.arraycopy(links, 0, offCampusCrimeLinks, 0, links.length);
             // Updated offCampusCrimeLinks array
         }
@@ -156,11 +160,14 @@ public class MyActivity extends AppCompatActivity{
 
         TableLayout offCampusTable = (TableLayout) findViewById(R.id.off_campus);
         offCampusTable.removeAllViews();
+
         TextView offMessage = (TextView) findViewById(R.id.off_message);
-        offMessage.setText("");
+
         TableLayout offCampusHeaderTable = (TableLayout) findViewById(R.id.offHeader_table);
         offCampusHeaderTable.removeAllViews();
+
         Button offCampusButton = (Button) findViewById(R.id.offCampus_button);
+
         String info = "";
         String crimeLink = "<a href='placeholder'>Report</a>";
         int length;
@@ -184,16 +191,19 @@ public class MyActivity extends AppCompatActivity{
             else if (crimes[0].equals("down"))
             {
                 offCampusButton.setText("Website down/not loading");
-                offMessage.setClickable(true);
-                offMessage.setMovementMethod(LinkMovementMethod.getInstance());
+
                 offMessage.setText(Html.fromHtml("The Columbus Police Department's website is " +
                         "currently unreachable.<br><br>Please be sure to check the " +
                         "<a href='http://www.columbuspolice.org/reports/SearchLocation?loc=zon4'>CPD " +
                         "web portal</a> later today or tomorrow for any updates."));
+                offMessage.setClickable(true);
+                offMessage.setMovementMethod(LinkMovementMethod.getInstance());
+
                 i = length;
             } else if (crimes[0].equals("empty"))
             {
                 offCampusButton.setText("No Off-Campus Crimes reported for " + dateFromSearch);
+
                 offMessage.setClickable(true);
                 offMessage.setMovementMethod(LinkMovementMethod.getInstance());
                 offMessage.setSingleLine(false);
@@ -207,7 +217,7 @@ public class MyActivity extends AppCompatActivity{
             else {
                 if (i == 0)
                 {
-                    offMessage.setHeight(0);
+                    offMessage.setText("");
                     offCampusButton.setText(crimeNum + " Off-Campus Crimes for " + dateFromSearch);
                     TableRow row = new TableRow(this);
                     // Create new row
@@ -249,61 +259,65 @@ public class MyActivity extends AppCompatActivity{
                         && ((i + 1) < length)
                         && ((i + 4) < length)
                         && j < crimeNum) {
-                    TableRow row = new TableRow(this);
-                    // Create new row
 
-                    TextView reportNum = new TextView(this);
-                    reportNum.setHeight(50);
-                    reportNum.setMaxWidth(25);
-                    reportNum.setSingleLine(false);
                     info = crimes[i];
 
-                    if (info != null && info.contains("null")) {
-                        info = info.replaceAll("null", "");
+                    if (info != null) {
+                        TableRow row = new TableRow(this);
+                        // Create new row
+
+                        TextView reportNum = new TextView(this);
+                        reportNum.setHeight(50);
+                        reportNum.setMaxWidth(25);
+                        reportNum.setSingleLine(false);
+
+                        if (info.contains("null")) {
+                            info = info.replaceAll("null", "");
+                        }
+                        reportNum.setText(info);
+                        row.addView(reportNum);
+                        // Add Report Number to row
+
+                        TextView incidentType = new TextView(this);
+                        incidentType.setHeight(50);
+                        incidentType.setMaxWidth(35);
+                        incidentType.setSingleLine(false);
+                        info = crimes[i + 1];
+
+                        if (info != null && info.contains("null")) {
+                            info = info.replaceAll("null", "");
+                        }
+                        incidentType.setText(info);
+                        row.addView(incidentType);
+                        // Add Incident Type to row
+
+                        TextView location = new TextView(this);
+                        location.setHeight(50);
+                        location.setMaxWidth(35);
+                        location.setSingleLine(false);
+                        info = crimes[i + 4];
+
+                        if (info != null && info.contains("null")) {
+                            info = info.replaceAll("null", "");
+                        }
+                        location.setText(info);
+                        row.addView(location);
+                        // Add location to row
+
+                        TextView description = new TextView(this);
+                        description.setHeight(50);
+                        description.setMaxWidth(35);
+                        description.setSingleLine(false);
+                        description.setClickable(true);
+                        description.setMovementMethod(LinkMovementMethod.getInstance());
+                        info = links[j];
+                        j++;
+
+                        description.setText(Html.fromHtml(crimeLink.replaceAll("placeholder", "http://www.columbuspolice.org/reports/PublicReport?caseID=" + info)));
+                        row.addView(description);
+                        // Add location to row
+                        offCampusTable.addView(row);
                     }
-                    reportNum.setText(info);
-                    row.addView(reportNum);
-                    // Add Report Number to row
-
-                    TextView incidentType = new TextView(this);
-                    incidentType.setHeight(50);
-                    incidentType.setMaxWidth(35);
-                    incidentType.setSingleLine(false);
-                    info = crimes[i + 1];
-
-                    if (info != null && info.contains("null")) {
-                        info = info.replaceAll("null", "");
-                    }
-                    incidentType.setText(info);
-                    row.addView(incidentType);
-                    // Add Incident Type to row
-
-                    TextView location = new TextView(this);
-                    location.setHeight(50);
-                    location.setMaxWidth(35);
-                    location.setSingleLine(false);
-                    info = crimes[i + 4];
-
-                    if (info != null && info.contains("null")) {
-                        info = info.replaceAll("null", "");
-                    }
-                    location.setText(info);
-                    row.addView(location);
-                    // Add location to row
-
-                    TextView description = new TextView(this);
-                    description.setHeight(50);
-                    description.setMaxWidth(35);
-                    description.setSingleLine(false);
-                    description.setClickable(true);
-                    description.setMovementMethod(LinkMovementMethod.getInstance());
-                    info = links[j];
-                    j++;
-
-                    description.setText(Html.fromHtml(crimeLink.replaceAll("placeholder", "http://www.columbuspolice.org/reports/PublicReport?caseID=" + info)));
-                    row.addView(description);
-                    // Add location to row
-                    offCampusTable.addView(row);
                 }
                 else
                 {
@@ -383,7 +397,6 @@ public class MyActivity extends AppCompatActivity{
                 }
                 else {
                     if (i == 0) {
-                        onMessage.setHeight(0);
                         onCampusButton.setText(crimeNum + " On-Campus Crimes for " + dateFromSearch);
                         TableRow row = new TableRow(this);
                         // Create new row
@@ -418,7 +431,6 @@ public class MyActivity extends AppCompatActivity{
 
                         onCampusTable.addView(row);
                     }
-
 
                     if ((i < crimes.length)
                             && ((i + 5) < crimes.length)
@@ -579,7 +591,7 @@ public class MyActivity extends AppCompatActivity{
         editor.putString("on", data.toString());
 
         data = new StringBuilder();
-        if (offCampusCrimeLinks.length > 0) {
+        if (offCampusCrimeLinks != null) {
             for (int i = 0; i < offCampusCrimeLinks.length; i++) {
                 data.append(offCampusCrimeLinks[i]).append("~");
             }
