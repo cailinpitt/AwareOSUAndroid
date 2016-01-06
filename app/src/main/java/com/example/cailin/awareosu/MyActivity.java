@@ -829,16 +829,24 @@ public class MyActivity extends AppCompatActivity{
 
     public void notifyUser()
     {
+
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        Intent intentAlarm = new Intent(this , AlarmReceiver.class);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, mNotificationId, intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT);
+
         Calendar calendar = Calendar.getInstance();
+        Calendar now = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 10);
         calendar.set(Calendar.MINUTE, 15);
         calendar.set(Calendar.SECOND, 00);
         // Set notification date
 
-        Intent intentAlarm = new Intent(this , AlarmReceiver.class);
-        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        if(calendar.before(now)){
+            calendar.add(Calendar.DATE, 1);
+        }
 
         //set the alarm for particular time
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), PendingIntent.getBroadcast(this, 1, intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT));
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
     }
 }

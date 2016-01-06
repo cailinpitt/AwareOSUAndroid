@@ -16,7 +16,9 @@
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
             android:supportsRtl="true"
-            android:theme="@style/AppTheme" >
+
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+
 
             <uses-library android:name="com.google.android.maps" />
             <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyBJLeRb0NrbaQk47qJuIYaXpliG4W8EsXA"/>
