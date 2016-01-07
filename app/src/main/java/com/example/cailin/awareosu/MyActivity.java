@@ -34,6 +34,7 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -263,11 +264,6 @@ public class MyActivity extends AppCompatActivity{
                     offCampusTable.addView(row);
 
                     // Add header
-
-                    //offCampusTable.setColumnStretchable(0, true);
-                    //offCampusTable.setColumnStretchable(1, true);
-                    //offCampusTable.setColumnStretchable(2, true);
-                    //offCampusTable.setColumnStretchable(3, true);
                 }
 
                 else if ((i < length)
@@ -586,6 +582,10 @@ public class MyActivity extends AppCompatActivity{
         }
         else if (id == R.id.pick_date){
             // Do date stuff
+
+            Toast toast = Toast.makeText(this, "Search can take up to a minute.", Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.TOP, 0, 0);
+            toast.show();
 
             DialogFragment newFragment = new DatePickerFragment();
             newFragment.show(getFragmentManager(),"Date Picker");

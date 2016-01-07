@@ -81,7 +81,6 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         }
         // We now have crime information
 
-
         ((MyActivity) getActivity()).offCampus(offCampusCrimes, offCampusCrimeLinks, date, numberOfOffCrimes);
         ((MyActivity) getActivity()).onCampus(onCampusCrimes, date, numberOfOnCrimes);
         // Load layout tables with information
@@ -173,6 +172,8 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
                         limit = numberOfOffCrimes + 1;
                     }
                     offCampusCrimeLinks = new String[trElements.size()];
+
+
                     for (Element crime : trElements) {
                         if ((counter != 0) && (counter < limit)) {
                             int indexOfParenthesis = crime.attr("onclick").indexOf(")");
