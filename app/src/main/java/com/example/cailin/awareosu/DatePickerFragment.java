@@ -38,6 +38,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
     public int selectedYear;
     int numberOfOnCrimes = 0;
     int numberOfOffCrimes = 0;
+    ProgressDialog prog;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
@@ -68,7 +69,10 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         // Update date that was searched
 
         try {
-            String[] info = new RetrieveCrimes().execute().get();
+            //ProgressDialog.show(getActivity(), "Test", "Sup");
+
+
+            new RetrieveCrimes().execute().get();
             // Make main thread wait until crime info is retrieved
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -76,6 +80,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
             e.printStackTrace();
         }
         // We now have crime information
+
 
         ((MyActivity) getActivity()).offCampus(offCampusCrimes, offCampusCrimeLinks, date, numberOfOffCrimes);
         ((MyActivity) getActivity()).onCampus(onCampusCrimes, date, numberOfOnCrimes);
@@ -85,11 +90,20 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
     /**
      * Class to handle web scraping.
      */
-    public class RetrieveCrimes extends AsyncTask<Void, Integer, String[]> {
-
+    public class RetrieveCrimes extends AsyncTask<Void, Void, Void> {
 
         @Override
-        protected String[] doInBackground(Void... arg0) {
+        protected void onPreExecute() {
+            prog = new ProgressDialog(getActivity());//Assuming that you are using fragments.
+            prog.setTitle("YO");
+            prog.setMessage("HEY");
+            prog.setCancelable(false);
+            prog.setIndeterminate(true);
+            prog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            prog.show();
+        }
+        @Override
+        protected Void doInBackground(Void... arg0) {
         /* Get yesterday's crimes */
 
             offCampusCrimes = new String[500];
@@ -238,6 +252,10 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
             return null;
         }
 
+        @Override
+        protected void onPostExecute(Void arg) {
+            prog.dismiss();
+        }
         protected String getYesterdaysDate(Void... arg0) {
             DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
             Calendar cal = Calendar.getInstance();

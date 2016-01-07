@@ -4,10 +4,12 @@ import android.app.AlarmManager;
 import android.app.DialogFragment;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
@@ -24,7 +26,11 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -46,7 +52,6 @@ public class MyActivity extends AppCompatActivity{
     public FragmentManager manager;
     public String date;
     private Geocoder coder;
-    static boolean active = false;
 
     // Sets an ID for the notification
     public int mNotificationId = 001;
@@ -212,9 +217,9 @@ public class MyActivity extends AppCompatActivity{
                 offMessage.setClickable(true);
                 offMessage.setMovementMethod(LinkMovementMethod.getInstance());
                 offMessage.setSingleLine(false);
-                offMessage.setText(Html.fromHtml("This is due to either:<br> &#8226; The Columbus Police Department forgetting " +
-                        "to upload crime information<br> &#8226; Attempting to retrieve crime information before " +
-                        "it has been uploaded<br> &#8226; No crimes have occurred on this day<br><br> Please be sure to " +
+                offMessage.setText(Html.fromHtml("This is due to either:<br>&nbsp;&#8226; The Columbus Police Department forgetting " +
+                        "to upload crime information<br>&nbsp;&#8226; Attempting to retrieve crime information before " +
+                        "it has been uploaded<br>&nbsp;&#8226; No crimes have occurred on this day<br><br> Please be sure to " +
                         "check the <a href='http://www.columbuspolice.org/reports/SearchLocation?loc=zon4'>CPD " +
                         "web portal</a> later today or tomorrow for any updates."));
                 i = length;
@@ -258,6 +263,11 @@ public class MyActivity extends AppCompatActivity{
                     offCampusTable.addView(row);
 
                     // Add header
+
+                    //offCampusTable.setColumnStretchable(0, true);
+                    //offCampusTable.setColumnStretchable(1, true);
+                    //offCampusTable.setColumnStretchable(2, true);
+                    //offCampusTable.setColumnStretchable(3, true);
                 }
 
                 else if ((i < length)
@@ -281,6 +291,7 @@ public class MyActivity extends AppCompatActivity{
                         reportNum.setHeight(50);
                         reportNum.setMaxWidth(25);
                         reportNum.setSingleLine(false);
+                        reportNum.setPaddingRelative(1, 1, 1, 1);
 
                         if (info.contains("null")) {
                             info = info.replaceAll("null", "");
@@ -293,6 +304,7 @@ public class MyActivity extends AppCompatActivity{
                         incidentType.setHeight(50);
                         incidentType.setMaxWidth(35);
                         incidentType.setSingleLine(false);
+                        incidentType.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i + 1];
 
                         if (info != null && info.contains("null")) {
@@ -306,6 +318,7 @@ public class MyActivity extends AppCompatActivity{
                         location.setHeight(50);
                         location.setMaxWidth(35);
                         location.setSingleLine(false);
+                        location.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i + 4];
 
                         if (info != null && info.contains("null")) {
@@ -320,6 +333,7 @@ public class MyActivity extends AppCompatActivity{
                         description.setMaxWidth(35);
                         description.setSingleLine(false);
                         description.setClickable(true);
+                        description.setPaddingRelative(1, 1, 1, 1);
                         description.setMovementMethod(LinkMovementMethod.getInstance());
                         info = links[j];
                         j++;
@@ -327,7 +341,15 @@ public class MyActivity extends AppCompatActivity{
                         description.setText(Html.fromHtml(crimeLink.replaceAll("placeholder", "http://www.columbuspolice.org/reports/PublicReport?caseID=" + info)));
                         row.addView(description);
                         // Add location to row
+
+                        View line = new View(this);
+                        line.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+                        line.setBackgroundColor(Color.rgb(51, 51, 51));
+                        offCampusTable.addView(line);
+                        // Add horizontal row
+
                         offCampusTable.addView(row);
+                        // Add info to TableLayout
                     }
                 }
                 else
@@ -378,6 +400,7 @@ public class MyActivity extends AppCompatActivity{
         TextView onMessage = (TextView) findViewById(R.id.on_message);
         onMessage.setText("");
         Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
+
         String info = "";
         // Access off-campus table and create variables
 
@@ -385,11 +408,12 @@ public class MyActivity extends AppCompatActivity{
         if (crimes[0].equals("empty"))
         {
             onCampusButton.setText("No On-Campus Crimes reported for " + dateFromSearch);
+            //onMessage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
             onMessage.setClickable(true);
             onMessage.setMovementMethod(LinkMovementMethod.getInstance());
-            onMessage.setText(Html.fromHtml("This is due to either:<br> &#8226; The Ohio State Police Department forgetting " +
-                    "to upload crime information<br> &#8226; Attempting to retrieve crime information before " +
-                    "it has been uploaded<br> &#8226; No crimes have occurred on this day<br><br> Please be sure to " +
+            onMessage.setText(Html.fromHtml("This is due to either:<br>&nbsp;&#8226; The Ohio State Police Department forgetting " +
+                    "to upload crime information<br>&nbsp;&#8226; Attempting to retrieve crime information before " +
+                    "it has been uploaded<br>&nbsp;&#8226; No crimes have occurred on this day<br><br> Please be sure to " +
                     "check the <a href='http://www.ps.ohio-state.edu/police/daily_log/'>OSU " +
                     "web portal</a> later today or tomorrow for any updates."));
         }
@@ -454,6 +478,7 @@ public class MyActivity extends AppCompatActivity{
                         reportNum.setHeight(50);
                         reportNum.setMaxWidth(45);
                         reportNum.setSingleLine(false);
+                        reportNum.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i];
 
 
@@ -494,6 +519,7 @@ public class MyActivity extends AppCompatActivity{
                         description.setHeight(50);
                         description.setMaxWidth(40);
                         description.setSingleLine(false);
+                        description.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i + 7];
 
                         if (info != null && info.contains("null")) {
@@ -503,7 +529,14 @@ public class MyActivity extends AppCompatActivity{
                         row.addView(description);
                         // Add location to row
 
+                        View line = new View(this);
+                        line.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+                        line.setBackgroundColor(Color.rgb(51, 51, 51));
+                        onCampusTable.addView(line);
+                        // Add horizontal row
+
                         onCampusTable.addView(row);
+                        // Add info to TableLayout
                     } else {
                         i = crimes.length;
                     }
@@ -553,8 +586,10 @@ public class MyActivity extends AppCompatActivity{
         }
         else if (id == R.id.pick_date){
             // Do date stuff
+
             DialogFragment newFragment = new DatePickerFragment();
             newFragment.show(getFragmentManager(),"Date Picker");
+
             return true;
         }
         else if (id == R.id.show_map){
@@ -622,6 +657,8 @@ public class MyActivity extends AppCompatActivity{
         editor.putBoolean("criticalSection", true);
 
         editor.apply();
+        // Save crime information. It will be passed back to MyActivity and reloaded after the user
+        // exits MapFragment
 
         manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -631,13 +668,7 @@ public class MyActivity extends AppCompatActivity{
         Bundle args = new Bundle();
         args.putDoubleArray("locations", locations);
         args.putStringArray("info", crimeInfo);
-
-        args.putStringArray("off", offCampusCrimes);
-        args.putStringArray("on", onCampusCrimes);
-        args.putString("date", date);
-        args.putStringArray("links", offCampusCrimeLinks);
-        args.putInt("onNum", onCrimeNum);
-        args.putInt("offNum", offCrimeNum);
+        // Pass locations & crime info to MapFragment
 
         fragment.setArguments(args);
         // Pass location array to map fragment

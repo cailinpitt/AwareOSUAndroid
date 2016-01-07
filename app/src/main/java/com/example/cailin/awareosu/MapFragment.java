@@ -39,16 +39,11 @@ public class MapFragment extends Fragment {
         Bundle args = getArguments();
         locations = args.getDoubleArray("locations");
         crimeInfo = args.getStringArray("info");
-        offCampusCrimes = args.getStringArray("off");
-        onCampusCrimes = args.getStringArray("on");
-        offCampusCrimeLinks = args.getStringArray("links");
-        onCrimeNum = args.getInt("onNum");
-        offCrimeNum = args.getInt("offNum");
-        // Retrieve locations from main activity
+        // Retrieve locations & crime info from main activity
 
-        double latitude = 40.006329;
-        double longitude = -83.016880;
-        // Default is OSU, in case no locations are found
+        double latitude;
+        double longitude;
+        // Initialize variables
 
         // inflate and return the layout
         View v = inflater.inflate(R.layout.activity_map_fragment, container,
