@@ -26,6 +26,7 @@
             <!-- Splash screen -->
             <activity
                 android:name=".SplashScreen"
+                android:alwaysRetainTaskState="true"
                 android:label="@string/app_name"
                 android:screenOrientation="portrait"
                 android:theme="@android:style/Theme.Black.NoTitleBar" >
@@ -37,6 +38,7 @@
 
             <activity
                 android:name=".MyActivity"
+                android:alwaysRetainTaskState="true"
                 android:label="@string/app_name"
                 android:theme="@style/AppTheme.NoActionBar" >
                 <intent-filter>
@@ -47,6 +49,7 @@
 
             <activity
                 android:name=".UserSettingsActivity"
+                android:alwaysRetainTaskState="true"
                 android:theme="@style/AppTheme"></activity>
 
             <receiver android:name=".AlarmReceiver"/>
