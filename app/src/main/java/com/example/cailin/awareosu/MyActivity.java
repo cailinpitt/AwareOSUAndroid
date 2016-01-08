@@ -39,24 +39,34 @@ import java.util.Calendar;
 import java.util.List;
 
 public class MyActivity extends AppCompatActivity{
-    public final static String EXTRA_MESSAGE = "com.example.cailin.MESSAGE";
     public String[] offCampusCrimes;
-    public String[] onCampusCrimes;
     public String[] offCampusCrimeLinks;
     public int offCrimeNum;
+
+    public String[] onCampusCrimes;
     public int onCrimeNum;
-    public FragmentManager manager;
+
     public String date;
+
+    public FragmentManager manager;
     private Geocoder coder;
+    // Declare global variables
 
-    // Sets an ID for the notification
     public int mNotificationId = 001;
+    // Set an ID for the daily notification
 
+    /**
+     * Create MyActivity.
+     *
+     * @param savedInstanceState Used to restore variables if onDestroy or onPause were called
+     *                           (however this is never used).
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         SharedPreferences SP = getSharedPreferences("firstRun", 0);
+        // Use this to figure out if app is being run for the first time
 
         if (SP.getBoolean("my_first_time", true)) {
             notifyUser();
@@ -71,13 +81,18 @@ public class MyActivity extends AppCompatActivity{
         setContentView(R.layout.activity_my);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        coder = new Geocoder(getBaseContext());
 
+        coder = new Geocoder(getBaseContext());
+        // Set up Geocoder
 
         SharedPreferences settings = getSharedPreferences("crimeInfo", 0);
         boolean isCriticalSection = settings.getBoolean("criticalSection", true);
+        // Figure out if we're returning from the Map Fragment and we have to rebuild MyActivity
 
         if (!isCriticalSection) {
+            // If we're not in the critical section, that means we're coming from Map Fragment
+            // Retrieve stored info and delete
+
             SharedPreferences.Editor editor = settings.edit();
             editor.remove("criticalSection");
 
@@ -110,23 +125,23 @@ public class MyActivity extends AppCompatActivity{
             editor.remove("offNum");
 
             editor.apply();
-
-            // We just came from map fragment, load previous info and display
         }
         else
         {
+            // Else app just started running, Splash Screen will be providing info
+
             Intent i = getIntent();
             offCampusCrimes = i.getStringArrayExtra("off");
             onCampusCrimes = i.getStringArrayExtra("on");
             offCampusCrimeLinks = i.getStringArrayExtra("offLinks");
             offCrimeNum = i.getIntExtra("offCrimeNum", 0);
             onCrimeNum = i.getIntExtra("onCrimeNum", 0);
-            // Get web scraped info from splash screen
 
             DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DATE, -1);
             date = dateFormat.format(cal.getTime());
+            // Retrieve yesterday's date
         }
 
         runOnUiThread(new Runnable() {
@@ -135,7 +150,7 @@ public class MyActivity extends AppCompatActivity{
                 offCampus(offCampusCrimes, offCampusCrimeLinks, date, offCrimeNum);
             }
         });
-        // Run on separate thread
+        // Run on separate thread (with access to UI)
 
         runOnUiThread(new Runnable() {
             @Override
@@ -143,7 +158,7 @@ public class MyActivity extends AppCompatActivity{
                 onCampus(onCampusCrimes, date, onCrimeNum);
             }
         });
-        // Run on separate thread
+        // Run on separate thread (with access to UI)
 
         FragmentManager fm = getSupportFragmentManager();
         fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
@@ -154,8 +169,17 @@ public class MyActivity extends AppCompatActivity{
         });
 
         PreferenceManager.setDefaultValues(this, R.xml.settings, false);
+        // Take care of UserSettingsActivity
     }
 
+    /**
+     * Using off campus crime information, update the off campus message box and TableLayout.
+     *
+     * @param crimes Array holding off campus crime information
+     * @param links Array holding id number used to link to the specific crime's online information
+     * @param dateFromSearch String holding the date corresponding to the crime information in crimes and links
+     * @param crimeNum Number of crimes for this day
+     */
     public void offCampus(String[] crimes, String[] links, String dateFromSearch, int crimeNum) {
         date = dateFromSearch;
         // Update date
@@ -171,25 +195,31 @@ public class MyActivity extends AppCompatActivity{
         {
             offCampusCrimeLinks = new String[links.length];
             System.arraycopy(links, 0, offCampusCrimeLinks, 0, links.length);
-            // Updated offCampusCrimeLinks array
         }
+        // Update offCampusCrimeLinks array
 
         offCrimeNum = crimeNum;
         // Update offCrimeNum
 
         TableLayout offCampusTable = (TableLayout) findViewById(R.id.off_campus);
         offCampusTable.removeAllViews();
+        // Access off campus TableLayout and clear it
 
         TextView offMessage = (TextView) findViewById(R.id.off_message);
+        // Access off campus message box
 
         TableLayout offCampusHeaderTable = (TableLayout) findViewById(R.id.offHeader_table);
         offCampusHeaderTable.removeAllViews();
+        // Access off campus header table and clear it
 
         Button offCampusButton = (Button) findViewById(R.id.offCampus_button);
+        // Access off campus button (used to display number of crimes for a specific day)
 
         String info = "";
         String crimeLink = "<a href='placeholder'>Report</a>";
         int length;
+        int j = 1;
+        // Declare variables
 
         if (crimeNum != 0)
         {
@@ -201,14 +231,16 @@ public class MyActivity extends AppCompatActivity{
         }
         // Access off-campus table and create variables
 
-        int j = 1;
         for (int i = 0; i < length; i += 5) {
             if (crimes[i] == null)
             {
                 i = length;
+                // This means we're done retrieving crime information. End loop
             }
             else if (crimes[0].equals("down"))
             {
+                // We were unable to retrieve crime information from website
+
                 offCampusButton.setText("Website down/not loading");
 
                 offMessage.setClickable(true);
@@ -223,6 +255,8 @@ public class MyActivity extends AppCompatActivity{
                 i = length;
             } else if (crimes[0].equals("empty"))
             {
+                // We were able to access website but no crimes for this day were found
+
                 offCampusButton.setText("No Off-Campus Crimes reported for " + dateFromSearch);
 
                 offMessage.setClickable(true);
@@ -238,8 +272,11 @@ public class MyActivity extends AppCompatActivity{
                 i = length;
             }
             else {
+                // Crime info available
                 if (i == 0)
                 {
+                    // Set up headers
+
                     offMessage.setText("");
                     offMessage.setHeight(0);
                     offCampusButton.setText(crimeNum + " Off-Campus Crimes for " + dateFromSearch);
@@ -276,19 +313,20 @@ public class MyActivity extends AppCompatActivity{
 
                     offCampusTable.addView(row);
 
-                    // Add header
+                    // Add header to TableLayout
                 }
 
                 else if ((i < length)
                         && ((i + 1) < length)
                         && ((i + 4) < length)
                         && (j < crimeNum)
-                        && (offCampusCrimes[i] != null)
-                        && (offCampusCrimes[i + 1] != null)
-                        && (offCampusCrimes[i + 4] != null)
-                        && (!offCampusCrimes[i].equals("null"))
-                        && (!offCampusCrimes[i + 1].equals("null"))
-                        && (!offCampusCrimes[i + 4].equals("null"))) {
+                        && (crimes[i] != null)
+                        && (crimes[i + 1] != null)
+                        && (crimes[i + 4] != null)
+                        && (!crimes[i].equals("null"))
+                        && (!crimes[i + 1].equals("null"))
+                        && (!crimes[i + 4].equals("null"))) {
+                    // Checking to ensure we're accessing valid locations & information in array
 
                     info = crimes[i];
 
@@ -301,7 +339,6 @@ public class MyActivity extends AppCompatActivity{
                         reportNum.setMaxWidth(25);
                         reportNum.setSingleLine(false);
                         reportNum.setPaddingRelative(1, 1, 1, 1);
-
                         if (info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
@@ -315,7 +352,6 @@ public class MyActivity extends AppCompatActivity{
                         incidentType.setSingleLine(false);
                         incidentType.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i + 1];
-
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
@@ -329,7 +365,6 @@ public class MyActivity extends AppCompatActivity{
                         location.setSingleLine(false);
                         location.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i + 4];
-
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
@@ -384,9 +419,13 @@ public class MyActivity extends AppCompatActivity{
         }
 
         if (crimeNum > 29) {
+            // Because of the limitations of HTML web scraping, we can only retrieve the first 29
+            // crimes of a given day from the CPD website (they use JS pagination).
+            // Tell user there are more than 29 crimes and provide link to view the rest.
+
             String columbusPD = "http://www.columbuspolice.org/reports/Results?from=placeholder&to=placeholder&loc=zon4&types=9";
             columbusPD = columbusPD.replaceAll("placeholder", date);
-            // Get URL
+            // Prepare URL
 
             TableRow row = new TableRow(this);
             // Create new row
@@ -401,12 +440,20 @@ public class MyActivity extends AppCompatActivity{
                     " are not shown. Click <a href='" + columbusPD + "'>here</a> to view the rest."));
 
             row.addView(overflow);
-            // Add Incident Type to row
+            // Add Overflow information to row
 
             offCampusTable.addView(row);
+            // Add to table
         }
     }
 
+    /**
+     * Using on campus crime information, update the on campus message box and TableLayout.
+     *
+     * @param crimes Array holding on campus crime information
+     * @param dateFromSearch String holding the date corresponding to the crime information in crimes and links
+     * @param crimeNum Number of crimes for this day
+     */
     public void onCampus(String[] crimes, String dateFromSearch, int crimeNum) {
         date = dateFromSearch;
         // Update date
@@ -423,12 +470,14 @@ public class MyActivity extends AppCompatActivity{
         onCampusHeaderTable.removeAllViews();
         TextView onMessage = (TextView) findViewById(R.id.on_message);
         Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
+        // Access XML elements
 
         String info = "";
-        // Access off-campus table and create variables
-
+        // Initialize variables
 
         if (crimes[0].equals("empty")) {
+            // This means we were able to access website, but no crimes were available for this day
+
             onCampusButton.setText("No On-Campus Crimes reported for " + dateFromSearch);
 
             onMessage.setClickable(true);
@@ -442,6 +491,8 @@ public class MyActivity extends AppCompatActivity{
             onMessage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         }
         else if (crimes[0].equals("down")) {
+            // This means we were not able to access website
+
             onCampusButton.setText("Website down/not loading");
 
             onMessage.setClickable(true);
@@ -453,12 +504,17 @@ public class MyActivity extends AppCompatActivity{
             onMessage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         }
         else {
+            // Else we have crime information
+
             for (int i = 0; i < crimes.length; i += 8) {
                 if ((crimes[i] == null) || (crimes[i].equals("null"))) {
                     i = crimes.length;
+                    // We've reached the end of available crime info, end loop
                 }
                 else {
                     if (i == 0) {
+                        // Setup table header
+
                         onMessage.setText("");
                         onMessage.setHeight(0);
                         onCampusButton.setText(crimeNum + " On-Campus Crimes for " + dateFromSearch);
@@ -500,6 +556,8 @@ public class MyActivity extends AppCompatActivity{
                             && ((i + 5) < crimes.length)
                             && ((i + 6) < crimes.length)
                             && ((i + 7) < crimes.length)) {
+                        // Ensure we're accessing valid locations & information in array
+
                         TableRow row = new TableRow(this);
                         // Create new row
 
@@ -509,8 +567,6 @@ public class MyActivity extends AppCompatActivity{
                         reportNum.setSingleLine(false);
                         reportNum.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i];
-
-
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
@@ -523,7 +579,6 @@ public class MyActivity extends AppCompatActivity{
                         incidentType.setMaxWidth(40);
                         incidentType.setSingleLine(false);
                         info = crimes[i + 5];
-
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
@@ -536,7 +591,6 @@ public class MyActivity extends AppCompatActivity{
                         location.setMaxWidth(40);
                         location.setSingleLine(false);
                         info = crimes[i + 6];
-
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
@@ -550,7 +604,6 @@ public class MyActivity extends AppCompatActivity{
                         description.setSingleLine(false);
                         description.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i + 7];
-
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
@@ -595,6 +648,11 @@ public class MyActivity extends AppCompatActivity{
         return true;
     }
 
+    /**
+     * Handle Action bar click.
+     *
+     * @param item Item in Action bar that was selected
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -602,13 +660,17 @@ public class MyActivity extends AppCompatActivity{
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        // Figure out what in Action bar was clicked, then handle it
         if (id == R.id.action_settings) {
+            // User selected settings
+
             Intent i = new Intent(this, UserSettingsActivity.class);
             startActivity(i);
+            // Start activity
 
             SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
             String notificationPreference = SP.getString("getNotification", "1");
+            // Retrieve settings preferences
 
             if (!notificationPreference.equals("1"))
             {
@@ -625,22 +687,29 @@ public class MyActivity extends AppCompatActivity{
                 notifyUser();
                 // User has selected the option to be notified of crimes
             }
+            // Update notification preference based on what the user chose
+
             return true;
         }
         else if (id == R.id.pick_date){
-            // Do date stuff
+            // User wants to search crime information for a specific day
 
             Toast toast = Toast.makeText(this, "Search can take up to 40 seconds.", Toast.LENGTH_LONG);
             toast.setGravity(Gravity.TOP, 0, 0);
             toast.show();
+            // Inform user that date search takes time
+
+            // I couldn't figure out how to do a process dialog on top of a dialogfragment, so this
+            // is me cheating
 
             DialogFragment newFragment = new DatePickerFragment();
             newFragment.show(getFragmentManager(),"Date Picker");
+            // Call & show DatePicker
 
             return true;
         }
         else if (id == R.id.show_map){
-            // Do map fragment
+            // User wants to view crime information on map
 
             String[] crimeLocations = getLocations(offCampusCrimes, onCampusCrimes);
             String crimeInfo[] = getCrimeInfo(offCampusCrimes, onCampusCrimes);
@@ -659,9 +728,17 @@ public class MyActivity extends AppCompatActivity{
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Start Map Fragment.
+     *
+     * @param locations Array holding latitude & longitude corresponding to each crime
+     * @param crimeInfo Array holding type of crime, corresponds to locations (ex. Assult, Robbery, etc.)
+     */
     private void addMapFragment(double[] locations, String[] crimeInfo) {
         SharedPreferences settings = getSharedPreferences("crimeInfo", 0);
         SharedPreferences.Editor editor = settings.edit();
+        // Save current crime info in SharedPreferences, we need this in order to restart MyActivity
+        // once the user clicks the back button
 
         StringBuilder data = new StringBuilder();
         for (int i = 0; i < offCampusCrimes.length; i++) {
@@ -704,8 +781,7 @@ public class MyActivity extends AppCompatActivity{
         editor.putBoolean("criticalSection", true);
 
         editor.apply();
-        // Save crime information. It will be passed back to MyActivity and reloaded after the user
-        // exits MapFragment
+        // Crime information saved
 
         manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -724,11 +800,13 @@ public class MyActivity extends AppCompatActivity{
         getSupportFragmentManager().executePendingTransactions();
     }
 
+    /**
+     * Handle back button click when in MapFragment.
+     */
     @Override
     public void onBackPressed() {
         SharedPreferences settings = getSharedPreferences("crimeInfo", 0);
         SharedPreferences.Editor editor = settings.edit();
-
         editor.remove("criticalSection");
         editor.putBoolean("criticalSection", false);
         editor.apply();
@@ -740,8 +818,11 @@ public class MyActivity extends AppCompatActivity{
         // Restart main, pass information crime info to it
     }
 
-    /*
-        Retrieves locations of crimes currently displayed in MyActivity
+    /**
+     * Extract crime locations.
+     *
+     * @param offCampusCrimeInfo Array holding off campus crime information
+     * @param onCampusCrimeInfo Array holding on campus crime information
      */
     public String[] getLocations(String[] offCampusCrimeInfo, String[] onCampusCrimeInfo)
     {
@@ -759,6 +840,7 @@ public class MyActivity extends AppCompatActivity{
                 if (location != null) {
                     // If valid location, add to result array
                     locations[counter] = (location + " Columbus, Ohio").replaceAll("null", "");
+                    // Add City + State to address to help Geocoder find exact latitude + longitude
                     counter++;
                 }
             }
@@ -774,6 +856,7 @@ public class MyActivity extends AppCompatActivity{
                 if (location != null) {
                     // If valid location, add to result array
                     locations[counter] = (location + " The Ohio State University").replaceAll("null", "");
+                    // Add University name to address to help Geocoder find exact latitude + longitude
                     counter++;
                 }
             }
@@ -792,6 +875,12 @@ public class MyActivity extends AppCompatActivity{
         return result;
     }
 
+    /**
+     * Extract crime description (ex. Assult, Robbery, etc).
+     *
+     * @param offCampusCrimeInfo Array holding off campus crime information
+     * @param onCampusCrimeInfo Array holding on campus crime information
+     */
     public String[] getCrimeInfo(String[] offCampusCrimeInfo, String[] onCampusCrimeInfo)
     {
         String[] info = new String[offCampusCrimeInfo.length + onCampusCrimeInfo.length];
@@ -841,13 +930,19 @@ public class MyActivity extends AppCompatActivity{
         return result;
     }
 
+    /**
+     * Convert street address info latitude + longitude.
+     *
+     * @param addresses Array holding the address corresponding to each crime
+     */
     public double[] getLocationFromAddress(String[] addresses) {
         double[] result = new double[addresses.length * 2];
         List<Address> address;
         LatLng p1 = null;
         int i;
-
         int j = 0;
+        // Declare variables
+
         for (i = 0; i < addresses.length; i++) {
             try {
                 String addressToSearch = addresses[i].replaceAll("&(?!amp;)", "and");
@@ -897,7 +992,7 @@ public class MyActivity extends AppCompatActivity{
                 result[j] = -1;
                 result[j + 1] = -1;
                 // This means we couldn't find the lat & long from the search.
-                // We won't add that location to the map.
+                // -1 means we won't add that location to the map.
             }
 
             j += 2;
@@ -905,26 +1000,32 @@ public class MyActivity extends AppCompatActivity{
         return result;
     }
 
+    /**
+     * Setup daily notification.
+     */
     public void notifyUser()
     {
 
         AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         Intent intentAlarm = new Intent(this , AlarmReceiver.class);
+        // Create new alarm & intent
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, mNotificationId, intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT);
+        // Create new pending intent
 
         Calendar calendar = Calendar.getInstance();
         Calendar now = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 10);
         calendar.set(Calendar.MINUTE, 15);
         calendar.set(Calendar.SECOND, 00);
-        // Set notification date
+        // Set notification date, 10:15 AM
 
         if(calendar.before(now)){
             calendar.add(Calendar.DATE, 1);
         }
+        // If 10:15 AM has passed already, set it for tomorrow
 
-        //set the alarm for particular time
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+        //Set alarm
     }
 }

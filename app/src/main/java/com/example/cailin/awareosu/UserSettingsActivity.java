@@ -3,6 +3,9 @@ package com.example.cailin.awareosu;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
+import android.view.LayoutInflater;
+import android.widget.LinearLayout;
+import android.widget.Toolbar;
 
 /**
  * Created by Cailin on 1/5/2016.
