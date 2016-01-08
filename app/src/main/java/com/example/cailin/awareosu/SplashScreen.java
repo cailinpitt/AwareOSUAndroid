@@ -59,7 +59,7 @@ public class SplashScreen extends Activity {
             // Create variables
 
             int retries = 0;
-            while (retries < 3) {
+            while (retries < 2) {
                 try {
                     try
                     {
@@ -87,7 +87,7 @@ public class SplashScreen extends Activity {
                 }
                 else
                 {
-                    retries = 3;
+                    retries = 2;
                 }
             }
 

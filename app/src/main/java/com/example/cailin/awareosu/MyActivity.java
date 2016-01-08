@@ -4,8 +4,6 @@ import android.app.AlarmManager;
 import android.app.DialogFragment;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,17 +16,14 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -134,8 +129,21 @@ public class MyActivity extends AppCompatActivity{
             date = dateFormat.format(cal.getTime());
         }
 
-        offCampus(offCampusCrimes, offCampusCrimeLinks, date, offCrimeNum);
-        onCampus(onCampusCrimes, date, onCrimeNum);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                offCampus(offCampusCrimes, offCampusCrimeLinks, date, offCrimeNum);
+            }
+        });
+        // Run on separate thread
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                onCampus(onCampusCrimes, date, onCrimeNum);
+            }
+        });
+        // Run on separate thread
 
         FragmentManager fm = getSupportFragmentManager();
         fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
@@ -203,12 +211,14 @@ public class MyActivity extends AppCompatActivity{
             {
                 offCampusButton.setText("Website down/not loading");
 
+                offMessage.setClickable(true);
+                offMessage.setMovementMethod(LinkMovementMethod.getInstance());
+                offMessage.setSingleLine(false);
                 offMessage.setText(Html.fromHtml("The Columbus Police Department's website is " +
                         "currently unreachable.<br><br>Please be sure to check the " +
                         "<a href='http://www.columbuspolice.org/reports/SearchLocation?loc=zon4'>CPD " +
                         "web portal</a> later today or tomorrow for any updates."));
-                offMessage.setClickable(true);
-                offMessage.setMovementMethod(LinkMovementMethod.getInstance());
+                offMessage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 
                 i = length;
             } else if (crimes[0].equals("empty"))
@@ -223,12 +233,15 @@ public class MyActivity extends AppCompatActivity{
                         "it has been uploaded<br>&nbsp;&#8226; No crimes have occurred on this day<br><br> Please be sure to " +
                         "check the <a href='http://www.columbuspolice.org/reports/SearchLocation?loc=zon4'>CPD " +
                         "web portal</a> later today or tomorrow for any updates."));
+                offMessage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+
                 i = length;
             }
             else {
                 if (i == 0)
                 {
                     offMessage.setText("");
+                    offMessage.setHeight(0);
                     offCampusButton.setText(crimeNum + " Off-Campus Crimes for " + dateFromSearch);
                     TableRow row = new TableRow(this);
                     // Create new row
@@ -409,32 +422,35 @@ public class MyActivity extends AppCompatActivity{
         TableLayout onCampusHeaderTable = (TableLayout) findViewById(R.id.onHeader_table);
         onCampusHeaderTable.removeAllViews();
         TextView onMessage = (TextView) findViewById(R.id.on_message);
-        onMessage.setText("");
         Button onCampusButton = (Button) findViewById(R.id.onCampus_button);
 
         String info = "";
         // Access off-campus table and create variables
 
 
-        if (crimes[0].equals("empty"))
-        {
+        if (crimes[0].equals("empty")) {
             onCampusButton.setText("No On-Campus Crimes reported for " + dateFromSearch);
-            //onMessage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+
             onMessage.setClickable(true);
             onMessage.setMovementMethod(LinkMovementMethod.getInstance());
+            onMessage.setSingleLine(false);
             onMessage.setText(Html.fromHtml("This is due to either:<br>&nbsp;&#8226; The Ohio State Police Department forgetting " +
                     "to upload crime information<br>&nbsp;&#8226; Attempting to retrieve crime information before " +
                     "it has been uploaded<br>&nbsp;&#8226; No crimes have occurred on this day<br><br> Please be sure to " +
                     "check the <a href='http://www.ps.ohio-state.edu/police/daily_log/'>OSU " +
                     "web portal</a> later today or tomorrow for any updates."));
+            onMessage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         }
         else if (crimes[0].equals("down")) {
             onCampusButton.setText("Website down/not loading");
+
             onMessage.setClickable(true);
             onMessage.setMovementMethod(LinkMovementMethod.getInstance());
+            onMessage.setSingleLine(false);
             onMessage.setText(Html.fromHtml("The OSU Police Department's website is currently unreachable.<br><br>" +
                     "Please be sure to check the <a href='http://www.ps.ohio-state.edu/police/daily_log/'>OSU web portal</a>" +
                     " later today or tomorrow for any updates."));
+            onMessage.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         }
         else {
             for (int i = 0; i < crimes.length; i += 8) {
@@ -443,6 +459,8 @@ public class MyActivity extends AppCompatActivity{
                 }
                 else {
                     if (i == 0) {
+                        onMessage.setText("");
+                        onMessage.setHeight(0);
                         onCampusButton.setText(crimeNum + " On-Campus Crimes for " + dateFromSearch);
                         TableRow row = new TableRow(this);
                         // Create new row

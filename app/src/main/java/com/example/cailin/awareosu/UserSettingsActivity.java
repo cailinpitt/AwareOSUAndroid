@@ -3,9 +3,6 @@ package com.example.cailin.awareosu;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.ViewGroup;
 
 /**
  * Created by Cailin on 1/5/2016.

@@ -9,7 +9,6 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Window;
@@ -69,9 +68,6 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         // Update date that was searched
 
         try {
-            //ProgressDialog.show(getActivity(), "Test", "Sup");
-
-
             new RetrieveCrimes().execute().get();
             // Make main thread wait until crime info is retrieved
         } catch (InterruptedException e) {
@@ -81,8 +77,23 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         }
         // We now have crime information
 
-        ((MyActivity) getActivity()).offCampus(offCampusCrimes, offCampusCrimeLinks, date, numberOfOffCrimes);
-        ((MyActivity) getActivity()).onCampus(onCampusCrimes, date, numberOfOnCrimes);
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((MyActivity) getActivity()).onCampus(onCampusCrimes, date, numberOfOnCrimes);
+            }
+        });
+        // Run on separate thread
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((MyActivity) getActivity()).offCampus(offCampusCrimes, offCampusCrimeLinks, date, numberOfOffCrimes);
+            }
+        });
+        // Run on separate thread
+
         // Load layout tables with information
     }
 
@@ -142,7 +153,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
                 }
                 else
                 {
-                    retries = 3;
+                    retries = 2;
                 }
             }
 
