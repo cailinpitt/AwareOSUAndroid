@@ -185,9 +185,10 @@ public class SplashScreen extends Activity {
             i.putExtra("offCrimeNum", numberOfOffCrimes);
             i.putExtra("onCrimeNum", numberOfOnCrimes);
             startActivity(i);
+            // Pass information to MyActivity
 
-            // close this activity
             finish();
+            // Close this activity
             return null;
         }
 
