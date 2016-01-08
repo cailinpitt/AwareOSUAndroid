@@ -1,4 +1,4 @@
-# AwareOSU Android Application
+# [AwareOSU Android Application](http://cailinpitt.github.io/AwareOSUAndroid)
 
 ### [What is AwareOSU?](https://github.com/CailinPitt/AwareOSU#awareosu)
 
