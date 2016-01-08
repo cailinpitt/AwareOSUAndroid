@@ -114,7 +114,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
             // Create variables
 
             int retries = 0;
-            while (retries < 3) {
+            while (retries < 2) {
                 try {
                     try
                     {

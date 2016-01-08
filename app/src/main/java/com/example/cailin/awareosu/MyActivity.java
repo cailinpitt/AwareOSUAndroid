@@ -330,6 +330,7 @@ public class MyActivity extends AppCompatActivity{
                         description.setSingleLine(false);
                         description.setClickable(true);
                         description.setPaddingRelative(1, 1, 1, 1);
+                        description.setGravity(Gravity.FILL_HORIZONTAL);
                         description.setMovementMethod(LinkMovementMethod.getInstance());
                         info = links[j];
                         j++;
@@ -339,10 +340,24 @@ public class MyActivity extends AppCompatActivity{
                         // Add location to row
 
                         View line = new View(this);
+                        line.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 20));
+                        line.setBackgroundColor(Color.rgb(255, 255, 255));
+                        line.setVisibility(View.INVISIBLE);
+                        offCampusTable.addView(line);
+                        // Add "padding"
+
+                        line = new View(this);
                         line.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
                         line.setBackgroundColor(Color.rgb(51, 51, 51));
                         offCampusTable.addView(line);
                         // Add horizontal row
+
+                        line = new View(this);
+                        line.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 20));
+                        line.setBackgroundColor(Color.rgb(255, 255, 255));
+                        line.setVisibility(View.INVISIBLE);
+                        offCampusTable.addView(line);
+                        // Add "padding"
 
                         offCampusTable.addView(row);
                         // Add info to TableLayout
@@ -526,10 +541,24 @@ public class MyActivity extends AppCompatActivity{
                         // Add location to row
 
                         View line = new View(this);
+                        line.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 20));
+                        line.setBackgroundColor(Color.rgb(255, 255, 255));
+                        line.setVisibility(View.INVISIBLE);
+                        onCampusTable.addView(line);
+                        // Add "padding"
+
+                        line = new View(this);
                         line.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
                         line.setBackgroundColor(Color.rgb(51, 51, 51));
                         onCampusTable.addView(line);
                         // Add horizontal row
+
+                        line = new View(this);
+                        line.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 20));
+                        line.setBackgroundColor(Color.rgb(255, 255, 255));
+                        line.setVisibility(View.INVISIBLE);
+                        onCampusTable.addView(line);
+                        // Add "padding"
 
                         onCampusTable.addView(row);
                         // Add info to TableLayout
@@ -583,7 +612,7 @@ public class MyActivity extends AppCompatActivity{
         else if (id == R.id.pick_date){
             // Do date stuff
 
-            Toast toast = Toast.makeText(this, "Search can take up to a minute.", Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(this, "Search can take up to 40 seconds.", Toast.LENGTH_LONG);
             toast.setGravity(Gravity.TOP, 0, 0);
             toast.show();
 
