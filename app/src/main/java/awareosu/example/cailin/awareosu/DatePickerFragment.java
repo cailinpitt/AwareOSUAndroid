@@ -1,4 +1,4 @@
-package com.example.cailin.awareosu;
+package awareosu.example.cailin.awareosu;
 
 /**
  * Created by Cailin on 12/31/2015.

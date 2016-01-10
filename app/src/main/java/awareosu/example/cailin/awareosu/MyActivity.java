@@ -1,4 +1,4 @@
-package com.example.cailin.awareosu;
+package awareosu.example.cailin.awareosu;
 
 import android.app.AlarmManager;
 import android.app.DialogFragment;
@@ -31,6 +31,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.cailin.awareosu.R;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.DateFormat;
@@ -285,28 +286,28 @@ public class MyActivity extends AppCompatActivity{
 
                     TextView reportNumHeader = new TextView(this);
                     reportNumHeader.setText("Report Number");
-                    reportNumHeader.setGravity(Gravity.LEFT);
+                    reportNumHeader.setGravity(Gravity.CENTER);
                     reportNumHeader.setTypeface(null, Typeface.BOLD);
                     row.addView(reportNumHeader);
                     // Add Report Number Header to header table
 
                     TextView IncidentTypeHeader = new TextView(this);
                     IncidentTypeHeader.setText("Incident Type");
-                    IncidentTypeHeader.setGravity(Gravity.LEFT);
+                    IncidentTypeHeader.setGravity(Gravity.CENTER);
                     IncidentTypeHeader.setTypeface(null, Typeface.BOLD);
                     row.addView(IncidentTypeHeader);
                     // Add Incident Type Header to header table
 
                     TextView locationHeader = new TextView(this);
                     locationHeader.setText("Location");
-                    locationHeader.setGravity(Gravity.LEFT);
+                    locationHeader.setGravity(Gravity.CENTER);
                     locationHeader.setTypeface(null, Typeface.BOLD);
                     row.addView(locationHeader);
                     // Add Location Header to header table
 
                     TextView descriptionHeader = new TextView(this);
                     descriptionHeader.setText("Description");
-                    descriptionHeader.setGravity(Gravity.LEFT);
+                    descriptionHeader.setGravity(Gravity.CENTER);
                     descriptionHeader.setTypeface(null, Typeface.BOLD);
                     row.addView(descriptionHeader);
                     // Add Description Header to header table
@@ -337,48 +338,51 @@ public class MyActivity extends AppCompatActivity{
                         TextView reportNum = new TextView(this);
                         reportNum.setHeight(50);
                         reportNum.setMaxWidth(25);
+                        reportNum.setGravity(Gravity.CENTER);
                         reportNum.setSingleLine(false);
                         reportNum.setPaddingRelative(1, 1, 1, 1);
                         if (info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
-                        reportNum.setText(info);
+                        reportNum.setText(info + "\n");
                         row.addView(reportNum);
                         // Add Report Number to row
 
                         TextView incidentType = new TextView(this);
-                        incidentType.setHeight(50);
+                        incidentType.setHeight(60);
                         incidentType.setMaxWidth(35);
+                        incidentType.setGravity(Gravity.CENTER);
                         incidentType.setSingleLine(false);
                         incidentType.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i + 1];
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
-                        incidentType.setText(info);
+                        incidentType.setText(info + "\n");
                         row.addView(incidentType);
                         // Add Incident Type to row
 
                         TextView location = new TextView(this);
-                        location.setHeight(50);
+                        location.setHeight(60);
                         location.setMaxWidth(35);
+                        location.setGravity(Gravity.CENTER);
                         location.setSingleLine(false);
                         location.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i + 4];
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
-                        location.setText(info);
+                        location.setText(info + "\n");
                         row.addView(location);
                         // Add location to row
 
                         TextView description = new TextView(this);
                         description.setHeight(50);
                         description.setMaxWidth(35);
+                        description.setGravity(Gravity.CENTER);
                         description.setSingleLine(false);
                         description.setClickable(true);
                         description.setPaddingRelative(1, 1, 1, 1);
-                        description.setGravity(Gravity.FILL_HORIZONTAL);
                         description.setMovementMethod(LinkMovementMethod.getInstance());
                         info = links[j];
                         j++;
@@ -523,28 +527,28 @@ public class MyActivity extends AppCompatActivity{
 
                         TextView reportNumHeader = new TextView(this);
                         reportNumHeader.setText("Report Number");
-                        reportNumHeader.setGravity(Gravity.LEFT);
+                        reportNumHeader.setGravity(Gravity.CENTER);
                         reportNumHeader.setTypeface(null, Typeface.BOLD);
                         row.addView(reportNumHeader);
                         // Add Report Number Header to header table
 
                         TextView IncidentTypeHeader = new TextView(this);
                         IncidentTypeHeader.setText("Incident Type");
-                        IncidentTypeHeader.setGravity(Gravity.LEFT);
+                        IncidentTypeHeader.setGravity(Gravity.CENTER);
                         IncidentTypeHeader.setTypeface(null, Typeface.BOLD);
                         row.addView(IncidentTypeHeader);
                         // Add Incident Type Header to header table
 
                         TextView locationHeader = new TextView(this);
                         locationHeader.setText("Location");
-                        locationHeader.setGravity(Gravity.LEFT);
+                        locationHeader.setGravity(Gravity.CENTER);
                         locationHeader.setTypeface(null, Typeface.BOLD);
                         row.addView(locationHeader);
                         // Add Location Header to header table
 
                         TextView descriptionHeader = new TextView(this);
                         descriptionHeader.setText("Description");
-                        descriptionHeader.setGravity(Gravity.LEFT);
+                        descriptionHeader.setGravity(Gravity.CENTER);
                         descriptionHeader.setTypeface(null, Typeface.BOLD);
                         row.addView(descriptionHeader);
                         // Add Description Header to header table
@@ -564,50 +568,55 @@ public class MyActivity extends AppCompatActivity{
                         TextView reportNum = new TextView(this);
                         reportNum.setHeight(50);
                         reportNum.setMaxWidth(45);
+                        reportNum.setGravity(Gravity.CENTER);
                         reportNum.setSingleLine(false);
                         reportNum.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i];
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
-                        reportNum.setText(info);
+                        reportNum.setText(info + "\n");
                         row.addView(reportNum);
                         // Add Report Number to row
 
                         TextView incidentType = new TextView(this);
                         incidentType.setHeight(50);
                         incidentType.setMaxWidth(40);
+                        incidentType.setGravity(Gravity.CENTER);
                         incidentType.setSingleLine(false);
                         info = crimes[i + 5];
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
-                        incidentType.setText(info);
+                        incidentType.setText(info + "\n");
                         row.addView(incidentType);
                         // Add Incident Type to row
 
                         TextView location = new TextView(this);
                         location.setHeight(50);
-                        location.setMaxWidth(40);
+                        location.setMaxWidth(50);
+                        location.setGravity(Gravity.CENTER);
+
                         location.setSingleLine(false);
                         info = crimes[i + 6];
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
-                        location.setText(info);
+                        location.setText(info + "\n");
                         row.addView(location);
                         // Add location to row
 
                         TextView description = new TextView(this);
                         description.setHeight(50);
                         description.setMaxWidth(40);
+                        description.setGravity(Gravity.CENTER);
                         description.setSingleLine(false);
                         description.setPaddingRelative(1, 1, 1, 1);
                         info = crimes[i + 7];
                         if (info != null && info.contains("null")) {
                             info = info.replaceAll("null", "");
                         }
-                        description.setText(info);
+                        description.setText(info + "\n");
                         row.addView(description);
                         // Add location to row
 

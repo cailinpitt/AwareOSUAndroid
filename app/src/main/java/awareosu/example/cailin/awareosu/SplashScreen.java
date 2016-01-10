@@ -1,9 +1,11 @@
-package com.example.cailin.awareosu;
+package awareosu.example.cailin.awareosu;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import com.example.cailin.awareosu.R;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

@@ -25,7 +25,7 @@
 
             <!-- Splash screen -->
             <activity
-                android:name=".SplashScreen"
+                android:name="awareosu.example.cailin.awareosu.SplashScreen"
                 android:alwaysRetainTaskState="true"
                 android:label="@string/app_name"
                 android:screenOrientation="portrait"
@@ -37,7 +37,7 @@
             </activity>
 
             <activity
-                android:name=".MyActivity"
+                android:name="awareosu.example.cailin.awareosu.MyActivity"
                 android:alwaysRetainTaskState="true"
                 android:label="@string/app_name"
                 android:theme="@style/AppTheme.NoActionBar" >
@@ -48,10 +48,10 @@
             </activity>
 
             <activity
-                android:name=".UserSettingsActivity"
+                android:name="awareosu.example.cailin.awareosu.UserSettingsActivity"
                 android:alwaysRetainTaskState="true"
                 android:theme="@style/AppTheme"></activity>
 
-            <receiver android:name=".AlarmReceiver"/>
+            <receiver android:name="awareosu.example.cailin.awareosu.AlarmReceiver"/>
     </application>
 </manifest>
