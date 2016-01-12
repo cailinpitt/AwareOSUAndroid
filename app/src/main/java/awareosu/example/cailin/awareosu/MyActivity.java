@@ -132,7 +132,7 @@ public class MyActivity extends AppCompatActivity{
         else
         {
             // Else app just started running (or something happened and we want to gracefully recover)
-            // , start from the beginning with the data SplashScreen provided
+            //, start from the beginning with the data SplashScreen provided
 
             Intent i = getIntent();
 
@@ -1063,8 +1063,8 @@ public class MyActivity extends AppCompatActivity{
 
         Calendar calendar = Calendar.getInstance();
         Calendar now = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 22);
-        calendar.set(Calendar.MINUTE, 14);
+        calendar.set(Calendar.HOUR_OF_DAY, 10);
+        calendar.set(Calendar.MINUTE, 15);
         calendar.set(Calendar.SECOND, 00);
         // Set notification date, 10:15 AM
 
