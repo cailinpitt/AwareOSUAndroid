@@ -91,16 +91,15 @@ public class MyActivity extends AppCompatActivity{
 
         SharedPreferences settings = getSharedPreferences("crimeInfo", 0);
         boolean isCriticalSection = settings.getBoolean("criticalSection", true);
+        String temp = settings.getString("off", null);
         // Figure out if we're returning from the Map Fragment and we have to rebuild MyActivity
 
-        if (!isCriticalSection) {
+        if (!isCriticalSection && temp != null) {
             // If we're not in the critical section, that means we're coming from Map Fragment
             // Retrieve stored info and delete
 
             SharedPreferences.Editor editor = settings.edit();
             editor.remove("criticalSection");
-
-            String temp = settings.getString("off", null);
             offCampusCrimes = temp.split("~");
             editor.remove("off");
 
@@ -132,9 +131,11 @@ public class MyActivity extends AppCompatActivity{
         }
         else
         {
-            // Else app just started running, Splash Screen will be providing info
+            // Else app just started running (or something happened and we want to gracefully recover)
+            // , start from the beginning with the data SplashScreen provided
 
             Intent i = getIntent();
+
             offCampusCrimes = i.getStringArrayExtra("off");
             onCampusCrimes = i.getStringArrayExtra("on");
             offCampusCrimeLinks = i.getStringArrayExtra("offLinks");
@@ -677,29 +678,8 @@ public class MyActivity extends AppCompatActivity{
             // User selected settings
 
             Intent i = new Intent(this, UserSettingsActivity.class);
-            startActivity(i);
+            startActivityForResult(i, 1);
             // Start activity
-
-            SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-            String notificationPreference = SP.getString("getNotification", "1");
-            // Retrieve settings preferences
-
-            if (!notificationPreference.equals("1"))
-            {
-                NotificationManager mNotificationManager =
-                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-                // mId allows you to update the notification later on.
-                // mNotificationManager.notify(mId, mBuilder.build());
-
-                // Cancels notification.
-                mNotificationManager.cancel(mNotificationId);
-            }
-            else {
-                notifyUser();
-                // User has selected the option to be notified of crimes
-            }
-            // Update notification preference based on what the user chose
 
             return true;
         }
@@ -739,6 +719,40 @@ public class MyActivity extends AppCompatActivity{
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == 1) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_CANCELED) {
+                // Checking if it equals RESULT_CANCELED because the user uses the back button to leave settings
+
+                // User updated settings, now update notification
+
+                SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                String notificationPreference = SP.getString("getNotification", "1");
+                // Retrieve settings preferences
+
+                if (!notificationPreference.equals("1"))
+                {
+                    NotificationManager mNotificationManager =
+                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                    // mId allows you to update the notification later on.
+
+                    // Cancels notification.
+                    mNotificationManager.cancel(mNotificationId);
+                }
+                else {
+                    notifyUser();
+                    // User has selected the option to be notified of crimes
+                }
+                // Update notification preference based on what the user chose
+
+            }
+        }
     }
 
     /**
@@ -1049,8 +1063,8 @@ public class MyActivity extends AppCompatActivity{
 
         Calendar calendar = Calendar.getInstance();
         Calendar now = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 10);
-        calendar.set(Calendar.MINUTE, 15);
+        calendar.set(Calendar.HOUR_OF_DAY, 22);
+        calendar.set(Calendar.MINUTE, 14);
         calendar.set(Calendar.SECOND, 00);
         // Set notification date, 10:15 AM
 
