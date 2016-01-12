@@ -4,7 +4,7 @@
 
 # News
 
-Development began December 2015, with a planned release date in February 2016.
+Development began December 2015, and AwareOSU 1.0 was released on January 9th, 2016. Download it [here](https://play.google.com/store/apps/details?id=awareosu.example.cailin.awareosu).
 
 # Features
 * Retrieve crime information from around the university area using [jsoup](http://jsoup.org/)
