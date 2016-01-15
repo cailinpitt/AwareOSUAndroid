@@ -827,27 +827,6 @@ public class MyActivity extends AppCompatActivity{
         getSupportFragmentManager().executePendingTransactions();
     }
 
-    public static boolean isLocationEnabled(Context context) {
-        int locationMode = 0;
-        String locationProviders;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            try {
-                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
-
-            } catch (Settings.SettingNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
-
-        }else{
-            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            return !TextUtils.isEmpty(locationProviders);
-        }
-
-
-    }
     /**
      * Handle back button click when in MapFragment.
      */
@@ -885,7 +864,7 @@ public class MyActivity extends AppCompatActivity{
                 String location = offCampusCrimeInfo[i + 4];
                 // Get location
 
-                if (location != null) {
+                if ((location != null) && (!location.equals("null"))) {
                     // If valid location, add to result array
                     locations[counter] = (location + " Columbus, Ohio").replaceAll("null", "");
                     // Add City + State to address to help Geocoder find exact latitude + longitude
@@ -901,7 +880,7 @@ public class MyActivity extends AppCompatActivity{
                 String location = onCampusCrimeInfo[i + 6];
                 // Get location
 
-                if (location != null) {
+                if ((location != null) && (!location.equals("null"))) {
                     // If valid location, add to result array
                     locations[counter] = (location + " The Ohio State University").replaceAll("null", "");
                     // Add University name to address to help Geocoder find exact latitude + longitude
