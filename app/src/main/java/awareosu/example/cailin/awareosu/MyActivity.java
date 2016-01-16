@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -54,10 +55,11 @@ public class MyActivity extends AppCompatActivity{
 
     public FragmentManager manager;
     private Geocoder coder;
-    // Declare global variables
 
-    public int mNotificationId = 001;
-    // Set an ID for the daily notification
+    public String[] crimeLocations;
+    public String[] crimeInfo;
+    public double[] latLong;
+    // Declare global variables
 
     /**
      * Create MyActivity.
@@ -69,18 +71,10 @@ public class MyActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences SP = getSharedPreferences("firstRun", 0);
-        // Use this to figure out if app is being run for the first time
-
-        if (SP.getBoolean("my_first_time", true)) {
-            notifyUser();
-            // App is being run for the first time, initially turn notifications on
-
-            SP.edit().putBoolean("my_first_time", false).apply();
-            // Record that app has been run for the first time
-        }
-        // We want user to always be notified of crimes until they selected "no notifications"
-        // in settings page
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.cancelAll();
+        // Cancel all scheduled notifications made by app in past updates.
 
         setContentView(R.layout.activity_my);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -673,17 +667,7 @@ public class MyActivity extends AppCompatActivity{
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        // Figure out what in Action bar was clicked, then handle it
-        if (id == R.id.action_settings) {
-            // User selected settings
-
-            Intent i = new Intent(this, UserSettingsActivity.class);
-            startActivityForResult(i, 1);
-            // Start activity
-
-            return true;
-        }
-        else if (id == R.id.pick_date){
+        if (id == R.id.pick_date){
             // User wants to search crime information for a specific day
 
             Toast toast = Toast.makeText(this, "Search can take up to 40 seconds.", Toast.LENGTH_LONG);
@@ -695,7 +679,7 @@ public class MyActivity extends AppCompatActivity{
             // is me cheating
 
             DialogFragment newFragment = new DatePickerFragment();
-            newFragment.show(getFragmentManager(),"Date Picker");
+            newFragment.show(getFragmentManager(), "Date Picker");
             // Call & show DatePicker
 
             return true;
@@ -703,9 +687,9 @@ public class MyActivity extends AppCompatActivity{
         else if (id == R.id.show_map){
             // User wants to view crime information on map
 
-            String[] crimeLocations = getLocations(offCampusCrimes, onCampusCrimes);
-            String crimeInfo[] = getCrimeInfo(offCampusCrimes, onCampusCrimes);
-            double[] latLong = getLocationFromAddress(crimeLocations);
+            crimeLocations = getLocations(offCampusCrimes, onCampusCrimes);
+            crimeInfo = getCrimeInfo(offCampusCrimes, onCampusCrimes);
+            latLong = getLocationFromAddress(crimeLocations);
             // Get array containing lat + long of crimes, needed for map
 
             setContentView(R.layout.activity_map_fragment);
@@ -717,6 +701,13 @@ public class MyActivity extends AppCompatActivity{
 
             return true;
         }
+        else if (id == R.id.definitions)
+        {
+            Uri uri = Uri.parse("http://cailinpitt.github.io/AwareOSU/definitions");
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+            // Go to definitions page on GitHub
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -726,32 +717,6 @@ public class MyActivity extends AppCompatActivity{
         // Check which request we're responding to
         if (requestCode == 1) {
             // Make sure the request was successful
-            if (resultCode == RESULT_CANCELED) {
-                // Checking if it equals RESULT_CANCELED because the user uses the back button to leave settings
-
-                // User updated settings, now update notification
-
-                SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                String notificationPreference = SP.getString("getNotification", "1");
-                // Retrieve settings preferences
-
-                if (!notificationPreference.equals("1"))
-                {
-                    NotificationManager mNotificationManager =
-                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-                    // mId allows you to update the notification later on.
-
-                    // Cancels notification.
-                    mNotificationManager.cancel(mNotificationId);
-                }
-                else {
-                    notifyUser();
-                    // User has selected the option to be notified of crimes
-                }
-                // Update notification preference based on what the user chose
-
-            }
         }
     }
 
@@ -1025,34 +990,5 @@ public class MyActivity extends AppCompatActivity{
             j += 2;
         }
         return result;
-    }
-
-    /**
-     * Setup daily notification.
-     */
-    public void notifyUser()
-    {
-
-        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        Intent intentAlarm = new Intent(this , AlarmReceiver.class);
-        // Create new alarm & intent
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, mNotificationId, intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT);
-        // Create new pending intent
-
-        Calendar calendar = Calendar.getInstance();
-        Calendar now = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 10);
-        calendar.set(Calendar.MINUTE, 15);
-        calendar.set(Calendar.SECOND, 00);
-        // Set notification date, 10:15 AM
-
-        if(calendar.before(now)){
-            calendar.add(Calendar.DATE, 1);
-        }
-        // If 10:15 AM has passed already, set it for tomorrow
-
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-        //Set alarm
     }
 }

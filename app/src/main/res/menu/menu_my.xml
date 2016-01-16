@@ -3,6 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MyActivity">
 
     <item
+        android:id="@+id/definitions"
+        android:icon="@drawable/question_icon"
+        android:title="Definition"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/pick_date"
         android:icon="@drawable/date_icon"
         android:title="Date"
@@ -12,7 +18,4 @@
         android:icon="@drawable/map_icon"
         android:title="Map"
         app:showAsAction="ifRoom"/>
-
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" app:showAsAction="never" />
 </menu>
