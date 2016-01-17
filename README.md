@@ -14,7 +14,7 @@ Development began December 2015, and AwareOSU 1.0 was released on January 9th, 2
 
 # What's going on with the code?
 
-### There are three activities:
+### There are two activities:
 * SplashScreen
   * First screen the user is presented with, displays white background with AwareOSU logo on top. The purpose of this screen is to web scrape crime information in the background, then pass the information to MyActivity (the main activity).
 
@@ -24,11 +24,6 @@ Development began December 2015, and AwareOSU 1.0 was released on January 9th, 2
   * Second screen the user is presented with, displays crime information and allows user to view map of crime locations, choose date to view crime information, or access settings page.
 
     <img src="https://raw.githubusercontent.com/CailinPitt/AwareOSUAndroid/master/Images/main.png" alt="Main Activity" width="250" height="445"/>
-
-* UserSettingsActivity
-  * Settings activity, allow user to specify notification preference.
-
-    <img src="https://raw.githubusercontent.com/CailinPitt/AwareOSUAndroid/master/Images/settings.png" alt="Settings" width="250" height="445"/>
 
 ### And two fragments:
 * DatePickerFragment
