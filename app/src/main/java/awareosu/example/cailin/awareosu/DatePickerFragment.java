@@ -119,7 +119,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
             offCampusCrimes = new String[500];
             onCampusCrimes = new String[500];
             String columbusPD = "http://www.columbuspolice.org/reports/Results?from=placeholder&to=placeholder&loc=zon4&types=9";
-            String OSUPD = "http://www.ps.ohio-state.edu/police/daily_log/view.php";
+            String OSUPD = "https://dps-web-01.busfin.ohio-state.edu/police/daily_log_2/view.php";
             Document doc = null;
             boolean websiteDown = false;
             // Create variables

@@ -53,7 +53,7 @@ public class SplashScreen extends Activity {
 
             date = getYesterdaysDate();
             String columbusPD = "http://www.columbuspolice.org/reports/Results?from=placeholder&to=placeholder&loc=zon4&types=9";
-            String OSUPD = "http://www.ps.ohio-state.edu/police/daily_log/view.php?date=yesterday";
+            String OSUPD = "https://dps-web-01.busfin.ohio-state.edu/police/daily_log_2/view.php?date=yesterday";
             Document doc = null;
             boolean websiteDown = false;
             int numberOfOnCrimes = 0;
